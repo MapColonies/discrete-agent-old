@@ -7,5 +7,16 @@
   },
   "server": {
     "port": "SERVER_PORT"
-  }
+  },
+  "watcher": {
+    "watchDirectory": "WATCH_DIRECTORY",
+    "watchOptions": {
+      "depth": "WATCH_DEPTH",
+      "awaitWriteFinish": "WATCH_AWAIT_WRITE_FINISH",
+      "persistent": "WATCH_PERSISTENT",
+      "useFsEvents": "WATCH_USE_FS_EVENTS",
+      "usePolling": "WATCH_USE_POLLING"
+    }
+  },
+  "externalReadinessUrl": "EXTERNAL_READINESS_URL"
 }

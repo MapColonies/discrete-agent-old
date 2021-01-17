@@ -10,5 +10,16 @@
   },
   "server": {
     "port": "8080"
-  }
+  },
+  "watcher": {
+    "watchDirectory": "/watch/**/*.shp",
+    "watchOptions": {
+      "depth": 2,
+      "awaitWriteFinish": true,
+      "persistent": true,
+      "useFsEvents": false,
+      "usePolling": true
+    }
+  },
+  "externalReadinessUrl": ""
 }
