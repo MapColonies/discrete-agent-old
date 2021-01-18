@@ -20,5 +20,6 @@
       "useFsEvents": false,
       "usePolling": true
     }
-  }
+  },
+  "externalReadinessUrl": ""
 }

@@ -17,5 +17,6 @@
       "useFsEvents": "WATCH_USE_FS_EVENTS",
       "usePolling": "WATCH_USE_POLLING"
     }
-  }
+  },
+  "externalReadinessUrl": "EXTERNAL_READINESS_URL"
 }
