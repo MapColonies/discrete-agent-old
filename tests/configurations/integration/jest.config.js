@@ -18,4 +18,7 @@ module.exports = {
   collectCoverageFrom: ['<rootDir>/src/**/*.{ts}', '!**/node_modules/**', '!**/vendor/**'],
   preset: 'ts-jest',
   testEnvironment: 'node',
+  moduleNameMapper: {
+    mockService: '<rootDir>/src/tests/__mocks__',
+  },
 };
