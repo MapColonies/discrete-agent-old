@@ -12,4 +12,7 @@ module.exports = {
   setupFiles: ['<rootDir>/tests/configurations/jest.setup.js'],
   preset: 'ts-jest',
   testEnvironment: 'node',
+  moduleNameMapper: {
+    mockService: '<rootDir>/src/tests/__mocks__',
+  },
 };

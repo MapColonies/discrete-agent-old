@@ -1,12 +1,12 @@
 import { readFile } from 'fs/promises';
 import { read as readShp } from 'shapefile';
-import { Proj, TemplateCoordinates } from 'proj4';
-import { BBox, Feature, FeatureCollection, GeoJSON, GeoJsonObject, Geometry, GeometryCollection } from 'geojson';
+import { Proj } from 'proj4';
+import { BBox, Feature, FeatureCollection, GeoJSON, GeoJsonObject, Geometry, GeometryCollection, Point } from 'geojson';
 import { inject } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 
-declare type Transform = (coordinates: TemplateCoordinates) => TemplateCoordinates;
+declare type Transform = (coordinates: number[]) => number[];
 declare type GeneralCords = number[] | number[][] | number[][][] | number[][][][];
 interface BasicGeometry extends GeoJsonObject {
   coordinates: GeneralCords;
@@ -17,6 +17,9 @@ export class ShpParser {
 
   public async parse(shp: string, dbf: string, prj?: string, encoding = 'utf-8'): Promise<GeoJSON> {
     const geoJson = await this.toGeoJson(shp, dbf, encoding);
+    //TODO: delete
+    const t = geoJson as Point;
+    console.log(typeof t.coordinates);
     if (prj !== undefined && prj != '') {
       await this.reProject(geoJson, prj);
     }
@@ -35,6 +38,8 @@ export class ShpParser {
   }
 
   private async reProject(geoJson: GeoJSON, prj: string): Promise<void> {
+    //TODO: delete console
+    console.log('!!!!!!!!!!!!!!!!!!!reprojectiong!!!!!!!!!!!!!');
     try {
       const projectionString = await readFile(prj, { encoding: 'utf-8' });
       const projection = Proj(projectionString);
@@ -98,6 +103,9 @@ export class ShpParser {
     if (geoJson.bbox) {
       geoJson.bbox = this.parseBBox(geoJson.bbox, transform);
     }
+    //TODO: delete console
+    console.log('!!!!!!!!!!!!!!!!!!!reprojectiong basic !!!!!!!!!!!!!');
+    console.log(typeof geoJson.coordinates);
     geoJson.coordinates = this.parseCoordinates(geoJson.coordinates, transform);
   }
 
@@ -110,7 +118,22 @@ export class ShpParser {
         }
         return cords as T;
       } else {
-        return transform(coordinates as number[]) as T;
+        //TODO: delete console
+        console.log('!!!!!!!!!!!!!!!!!!!reprojectiong internal!!!!!!!!!!!!!');
+        console.log(coordinates);
+        console.log(typeof coordinates);
+        let coordinatesArray: number[] = [];
+        if (typeof coordinates === 'object') {
+          (coordinates as number[]).forEach((value: number) => {
+            coordinatesArray.push(value);
+          });
+        } else {
+          coordinatesArray = coordinates as number[];
+        }
+        console.log(typeof coordinatesArray);
+        const wgs84Cords = transform(coordinatesArray) as T;
+        console.log(wgs84Cords);
+        return wgs84Cords;
       }
     }
     return coordinates;
@@ -119,12 +142,12 @@ export class ShpParser {
   private parseBBox(bbox: BBox, transform: Transform): BBox {
     const bbox3DLength = 6;
     if (bbox.length === bbox3DLength) {
-      const point1 = transform([bbox[0], bbox[1], bbox[2]]) as number[];
-      const point2 = transform([bbox[3], bbox[4], bbox[5]]) as number[];
+      const point1 = transform([bbox[0], bbox[1], bbox[2]]);
+      const point2 = transform([bbox[3], bbox[4], bbox[5]]);
       return [point1[0], point1[1], point1[2], point2[0], point2[1], point2[2]];
     } else {
-      const point1 = transform([bbox[0], bbox[1]]) as number[];
-      const point2 = transform([bbox[2], bbox[3]]) as number[];
+      const point1 = transform([bbox[0], bbox[1]]);
+      const point2 = transform([bbox[2], bbox[3]]);
       return [point1[0], point1[1], point2[0], point2[1]];
     }
   }
