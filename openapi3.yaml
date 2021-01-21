@@ -9,31 +9,21 @@ info:
 servers:
   - url: http://localhost:8080
 paths:
-  /resourceName:
-    get:
-      operationId: getResourceName
+  /trigger:
+    post:
+      operationId: CreateLayer
       tags:
-        - resourceName
-      summary: gets the resource
+        - ManualTrigger
+      summary: trigger layer creation from source directory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createLayerRequest'
       responses:
         200:
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
-    post:
-      operationId: createResource
-      tags:
-        - resourceName
-      summary: creates a new record of type resource
-      responses:
-        201:
-          description: created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/resource'
         400:
           description: Bad Request
           content:
@@ -49,17 +39,10 @@ components:
       properties:
         message:
           type: string
-    resource:
+    createLayerRequest:
       type: object
       required:
-        - id
-        - name
-        - description
+        - sourceDirectory
       properties:
-        id:
-          type: number
-          format: int64
-        name:
-          type: string
-        description:
+        sourceDirectory:
           type: string
