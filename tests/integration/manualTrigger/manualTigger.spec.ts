@@ -1,11 +1,9 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { IResourceNameModel } from '../../../src/resourceName/models/resourceNameManager';
-
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
-describe('resourceName', function () {
+describe('manualTrigger', function () {
   beforeAll(function () {
     registerTestValues();
     requestSender.init();
@@ -15,20 +13,30 @@ describe('resourceName', function () {
   });
 
   describe('Happy Path', function () {
-    it('should return 200 status code and the resource', async function () {
-      const response = await requestSender.getResource();
+    it('should return 200 status code', async function () {
+      const validRequest = {
+        sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-
-      const resource = response.body as IResourceNameModel;
-      expect(resource.id).toEqual(1);
-      expect(resource.name).toEqual('ronin');
-      expect(resource.description).toEqual('can you do a logistics run?');
     });
   });
+
   describe('Bad Path', function () {
     // All requests with status code of 400
+    it('should return 400 status code', async function () {
+      const invalidRequest = {
+        directory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(invalidRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
   });
+
   describe('Sad Path', function () {
     // All requests with status code 4XX-5XX
   });

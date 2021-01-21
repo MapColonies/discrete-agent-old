@@ -1,5 +1,7 @@
-import { ILogMethod } from '@map-colonies/mc-logger';
-
+interface ILogMethod {
+  (level: string, message: string, ...meta: unknown[]): void;
+  (level: string, message: string): void;
+}
 export interface ILogger {
   log: ILogMethod;
 }
