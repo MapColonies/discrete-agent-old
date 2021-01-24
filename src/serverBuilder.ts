@@ -7,6 +7,7 @@ import { RequestLogger } from './common/middlewares/RequestLogger';
 import { Services } from './common/constants';
 import { IConfig, ILogger } from './common/interfaces';
 import { manualTriggerRouterFactory } from './manualTrigger/routes/manualTriggerRouter';
+import { watchStatusRouterFactory } from './watchStatus/routes/watchStatusRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
 
 @injectable()
@@ -31,6 +32,7 @@ export class ServerBuilder {
 
   private buildRoutes(): void {
     this.serverInstance.use('/trigger', manualTriggerRouterFactory(container));
+    this.serverInstance.use('/status', watchStatusRouterFactory(container));
     this.serverInstance.use('/', openapiRouterFactory(container));
   }
 
