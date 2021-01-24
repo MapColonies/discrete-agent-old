@@ -30,6 +30,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /status:
+    get:
+      operationId: getWatchStatus
+      tags:
+        - WatchStatus
+      summary: returns the watching status of the agent.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/watchStatus'
+  /status/start:
+    post:
+      operationId: startWatching
+      tags:
+        - WatchStatus
+      summary: starts the agent file watcher.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/watchStatus'
+  /status/stop:
+    post:
+      operationId: stopWatching
+      tags:
+        - WatchStatus
+      summary: stops the agent file watcher.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/watchStatus'
 components:
   schemas:
     error:
@@ -46,3 +85,8 @@ components:
       properties:
         sourceDirectory:
           type: string
+    watchStatus:
+      type: object
+      properties:
+        watching:
+          type: boolean
