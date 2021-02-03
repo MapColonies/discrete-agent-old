@@ -1,14 +1,18 @@
+import { dirname } from 'path';
 import { watch, FSWatcher, WatchOptions } from 'chokidar';
 import { inject, singleton } from 'tsyringe';
 import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
+import { Trigger } from '../layerCreator/models/trigger';
 
 @singleton()
 export class Watcher {
   private readonly watcher: FSWatcher;
   private watching: boolean;
 
-  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, @inject(Services.LOGGER) private readonly logger: ILogger) {
+  public constructor(@inject(Services.CONFIG) private readonly config: IConfig, 
+  @inject(Services.LOGGER) private readonly logger: ILogger, 
+    private readonly trigger: Trigger) {
     const watchDir = config.get<string>('watcher.watchDirectory');
     const watchOptions = config.get<WatchOptions>('watcher.watchOptions');
     this.watcher = watch(watchDir, watchOptions);
@@ -45,6 +49,11 @@ export class Watcher {
   }
 
   private onAdd(path: string): void {
+    const dir = dirname(path);
+    void this.trigger.trigger(dir).catch(err =>{
+      const error = err as Error
+      this.logger.log('error',`failed to trigger layer for ${path}. error: ${error.message}`)
+    });
     //TODO: trigger logic
   }
 }
