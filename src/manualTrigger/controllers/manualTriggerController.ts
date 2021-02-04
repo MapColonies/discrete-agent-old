@@ -16,10 +16,10 @@ export class ManualTriggerController {
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger, private readonly manager: ManualTriggerManager) {}
 
   public createLayer: CreateLayerHandler = async (req, res, next) => {
-    try{
+    try {
       await this.manager.createLayer(req.body.sourceDirectory);
       return res.sendStatus(httpStatus.OK);
-    } catch(err){
+    } catch (err) {
       next(err);
     }
   };
