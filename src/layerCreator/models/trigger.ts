@@ -30,7 +30,7 @@ interface IMetaDataFeatureProperties {
 @injectable()
 export class Trigger {
   public constructor(private readonly shpParser: ShpParser) {}
-  public async trigger(directory: string): Promise<void> {
+  public async trigger(directory: string, isManual = false): Promise<void> {
     //TODO: get history
     //TODO: if history don't exists create it
     //TODO: if history is not pending exit
@@ -46,14 +46,21 @@ export class Trigger {
       const filesGeoJson = await this.shpParser.parse(filesShp, filesDbf);
       const files = this.parseFilesShpJson(filesGeoJson);
       if (!(await this.validateLayerFilesExists(directory, files))) {
+        if (isManual) {
+          this.handleManualMissingFilesError();
+        }
         return;
       }
       // parse all shp files and convert to model
       const productGeoJson = await this.shpParser.parse(productShp, productDbf);
       const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
-      this.parseToMetadata(productGeoJson, metaDataGeoJson, files);
+      //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
+      const metadata = this.parseToMetadata(productGeoJson, metaDataGeoJson, files);
       //TODO: trigger overseer
       //TODO: update history status to triggered
+    }
+    if (isManual) {
+      this.handleManualMissingFilesError();
     }
   }
 
@@ -65,14 +72,20 @@ export class Trigger {
     metadataShp: string,
     metadataDbf: string
   ): Promise<boolean> {
-    return (
-      (await this.fileExists(filesShp)) &&
-      (await this.fileExists(filesDbf)) &&
-      (await this.fileExists(productShp)) &&
-      (await this.fileExists(productDbf)) &&
-      (await this.fileExists(metadataShp)) &&
-      (await this.fileExists(metadataDbf))
-    );
+    const filesExist = await Promise.all([
+      this.fileExists(filesShp),
+      this.fileExists(filesDbf),
+      this.fileExists(productShp),
+      this.fileExists(productDbf),
+      this.fileExists(metadataShp),
+      this.fileExists(metadataDbf),
+    ]);
+    for (const fileExist of filesExist) {
+      if (!fileExist) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private async validateLayerFilesExists(directory: string, files: string[]): Promise<boolean> {
@@ -121,5 +134,10 @@ export class Trigger {
       return `${file['File Name']}.${file.Format}`;
     });
     return files;
+  }
+
+  private handleManualMissingFilesError(): void {
+    //TODO: replace with custom error
+    throw new Error('missing files');
   }
 }
