@@ -1,9 +1,10 @@
 import { read as readShp } from 'shapefile';
 import { GeoJSON } from 'geojson';
-import { inject } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 
+@injectable()
 export class ShpParser {
   public constructor(@inject(Services.LOGGER) private readonly logger: ILogger) {}
 
