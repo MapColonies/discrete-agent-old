@@ -90,8 +90,6 @@ export class Trigger {
           'error',
           `failed to update agent-DB for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
         );
-        //TODO: add custom error
-        throw err;
       }
     }
     if (isManual) {
