@@ -1,9 +1,14 @@
 import { promises as fsPromise } from 'fs';
 import { constants as fsConstants } from 'fs';
 import { isAbsolute, join } from 'path';
-import { injectable } from 'tsyringe';
+import * as path from 'path';
+import { IConfig } from 'config';
+import { inject, injectable } from 'tsyringe';
 import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
 import { GeoJSON, FeatureCollection } from 'geojson';
+import axios from 'axios';
+import { Services } from '../../common/constants';
+import { ILogger } from '../../common/interfaces';
 import { ShpParser } from './shpParser';
 
 interface IMetaDataFeatureProperties {
@@ -29,18 +34,23 @@ interface IMetaDataFeatureProperties {
 
 @injectable()
 export class Trigger {
-  public constructor(private readonly shpParser: ShpParser) {}
+  public constructor(
+    private readonly shpParser: ShpParser,
+    @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.CONFIG) private readonly config: IConfig
+  ) {}
+
   public async trigger(directory: string, isManual = false): Promise<void> {
     //TODO: get history
     //TODO: if history don't exists create it
     //TODO: if history is not pending exit
     //check if all shp files exists
-    const filesShp = `${directory}/Files.shp`;
-    const filesDbf = `${directory}/Files.dbf`;
-    const productShp = `${directory}/Product.shp`;
-    const productDbf = `${directory}/Product.dbf`;
-    const metadataShp = `${directory}/ShapeMetadata.shp`;
-    const metadataDbf = `${directory}/ShapeMetadata.dbf`;
+    const filesShp = path.join(directory, 'Files.shp');
+    const filesDbf = path.join(directory, 'Files.dbf');
+    const productShp = path.join(directory, 'Product.shp');
+    const productDbf = path.join(directory, 'Product.dbf');
+    const metadataShp = path.join(directory, 'ShapeMetadata.shp');
+    const metadataDbf = path.join(directory, 'ShapeMetadata.dbf');
     if (await this.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
       const filesGeoJson = await this.shpParser.parse(filesShp, filesDbf);
@@ -56,7 +66,14 @@ export class Trigger {
       const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
       //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
       const metadata = this.parseToMetadata(productGeoJson, metaDataGeoJson, files);
-      //TODO: trigger overseer
+      const urlPath = this.config.get<string>('overseer.url');
+      try {
+        await axios.post(urlPath + '/layers', metadata);
+      } catch (error) {
+        console.error(error);
+        // todo: add log
+      }
+
       //TODO: update history status to triggered
     }
     if (isManual) {
