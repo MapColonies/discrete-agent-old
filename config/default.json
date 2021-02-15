@@ -24,5 +24,8 @@
   "overseer": {
     "url": "http://127.0.0.1:8081"
   },
+  "agentDB": {
+    "url": "http://127.0.0.1:8082"
+  },
   "externalReadinessUrl": ""
 }

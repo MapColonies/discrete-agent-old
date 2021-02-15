@@ -66,15 +66,33 @@ export class Trigger {
       const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
       //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
       const metadata = this.parseToMetadata(productGeoJson, metaDataGeoJson, files);
-      const urlPath = this.config.get<string>('overseer.url');
+      this.logger.log('info', `Trigger overseer for id: ${metadata.source as string} version: ${metadata.version as string}`);
+      const overseerUrlPath = this.config.get<string>('overseer.url');
       try {
-        await axios.post(urlPath + '/layers', metadata);
-      } catch (error) {
-        console.error(error);
-        // todo: add log
+        await axios.post(`${overseerUrlPath}/layers`, metadata);
+      } catch (err) {
+        const error = err as Error;
+        this.logger.log(
+          'error',
+          `failed to trigger overseer for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
+        );
+        //TODO: add custom error
+        throw err;
       }
 
-      //TODO: update history status to triggered
+      this.logger.log('info', `Update agent-DB history for id: ${metadata.source as string} version: ${metadata.version as string}`);
+      const agentDBUrlPath = this.config.get<string>('agentDB.url');
+      try {
+        await axios.post(`${agentDBUrlPath}/${metadata.source as string}/${metadata.version as string}`);
+      } catch (err) {
+        const error = err as Error;
+        this.logger.log(
+          'error',
+          `failed to update agent-DB for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
+        );
+        //TODO: add custom error
+        throw err;
+      }
     }
     if (isManual) {
       this.handleManualMissingFilesError();
