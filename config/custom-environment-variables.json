@@ -18,5 +18,11 @@
       "usePolling": "WATCH_USE_POLLING"
     }
   },
+  "overseer": {
+    "url": "OVERSEER_URL"
+  },
+  "agentDB": {
+    "url": "AGENT_DB_URL"
+  },
   "externalReadinessUrl": "EXTERNAL_READINESS_URL"
 }
