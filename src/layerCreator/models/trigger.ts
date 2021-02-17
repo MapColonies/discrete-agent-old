@@ -91,8 +91,7 @@ export class Trigger {
           `failed to update agent-DB for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
         );
       }
-    }
-    if (isManual) {
+    } else if (isManual) {
       this.handleManualMissingFilesError();
     }
   }
