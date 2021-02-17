@@ -1,5 +1,6 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
+import { post } from '../../__mocks__/axios';
 import { registerTestValues } from '../testContainerConfig';
 import * as requestSender from './helpers/requestSender';
 
@@ -13,7 +14,8 @@ describe('manualTrigger', function () {
   });
 
   describe('Happy Path', function () {
-    it('should return 200 status code', async function () {
+    it.only('should return 200 status code', async function () {
+      post.mockResolvedValue()
       const validRequest = {
         sourceDirectory: 'testDir',
       };
