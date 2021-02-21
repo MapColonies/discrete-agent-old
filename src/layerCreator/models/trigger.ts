@@ -1,6 +1,3 @@
-import { promises as fsPromise } from 'fs';
-import { constants as fsConstants } from 'fs';
-import { isAbsolute, join } from 'path';
 import * as path from 'path';
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
@@ -10,6 +7,7 @@ import axios from 'axios';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 import { ShpParser } from './shpParser';
+import { FilesManager } from './filesManager';
 
 interface IMetaDataFeatureProperties {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -36,6 +34,7 @@ interface IMetaDataFeatureProperties {
 export class Trigger {
   public constructor(
     private readonly shpParser: ShpParser,
+    private readonly fileManager: FilesManager,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {}
@@ -51,11 +50,11 @@ export class Trigger {
     const productDbf = path.join(directory, 'Product.dbf');
     const metadataShp = path.join(directory, 'ShapeMetadata.shp');
     const metadataDbf = path.join(directory, 'ShapeMetadata.dbf');
-    if (await this.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
+    if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
       const filesGeoJson = await this.shpParser.parse(filesShp, filesDbf);
       const files = this.parseFilesShpJson(filesGeoJson);
-      if (!(await this.validateLayerFilesExists(directory, files))) {
+      if (!(await this.fileManager.validateLayerFilesExists(directory, files))) {
         if (isManual) {
           this.handleManualMissingFilesError();
         }
@@ -91,53 +90,9 @@ export class Trigger {
           `failed to update agent-DB for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
         );
       }
-    }
-    if (isManual) {
+    } else if (isManual) {
       this.handleManualMissingFilesError();
     }
-  }
-
-  private async validateShpFilesExists(
-    filesShp: string,
-    filesDbf: string,
-    productShp: string,
-    productDbf: string,
-    metadataShp: string,
-    metadataDbf: string
-  ): Promise<boolean> {
-    const filesExist = await Promise.all([
-      this.fileExists(filesShp),
-      this.fileExists(filesDbf),
-      this.fileExists(productShp),
-      this.fileExists(productDbf),
-      this.fileExists(metadataShp),
-      this.fileExists(metadataDbf),
-    ]);
-    for (const fileExist of filesExist) {
-      if (!fileExist) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private async validateLayerFilesExists(directory: string, files: string[]): Promise<boolean> {
-    for (let i = 0; i < files.length; i++) {
-      if (!isAbsolute(files[i])) {
-        files[i] = join(directory, files[i]);
-      }
-      if (!(await this.fileExists(files[i]))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private async fileExists(path: string): Promise<boolean> {
-    return fsPromise
-      .access(path, fsConstants.F_OK)
-      .then(() => true)
-      .catch(() => false);
   }
 
   private parseToMetadata(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, files: string[]): LayerMetadata {

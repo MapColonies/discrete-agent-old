@@ -9,6 +9,6 @@ export class ManualTriggerManager {
 
   public async createLayer(sourceDirectory: string): Promise<void> {
     this.logger.log('info', `layer creation manual trigger from '${sourceDirectory}'`);
-    await this.trigger.trigger(sourceDirectory);
+    await this.trigger.trigger(sourceDirectory, true);
   }
 }
