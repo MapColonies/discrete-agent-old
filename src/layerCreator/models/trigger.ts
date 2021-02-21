@@ -91,7 +91,6 @@ export class Trigger {
         );
       }
     } else if (isManual) {
-      console.log('here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       this.handleManualMissingFilesError();
     }
   }
