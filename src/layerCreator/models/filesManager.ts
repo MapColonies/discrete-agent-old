@@ -44,7 +44,7 @@ export class FilesManager {
     return fsPromise
       .access(path, fsConstants.F_OK)
       .then(() => true)
-      .catch((err) => {
+      .catch(() => {
         return false;
       });
   }
