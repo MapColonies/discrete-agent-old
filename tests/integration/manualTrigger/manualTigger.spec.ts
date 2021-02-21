@@ -1,21 +1,28 @@
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
-import { post } from '../../__mocks__/axios';
+import axiosMock from 'jest-mock-axios';
 import { registerTestValues } from '../testContainerConfig';
+import { validateLayerFilesExistsMock, validateShpFilesExistsMock } from '../../mocks/filesManager';
+import { initShapeFileMock } from '../../mocks/shapeFile';
 import * as requestSender from './helpers/requestSender';
 
 describe('manualTrigger', function () {
   beforeAll(function () {
     registerTestValues();
     requestSender.init();
+    initShapeFileMock();
   });
   afterEach(function () {
     container.clearInstances();
+    jest.resetAllMocks();
+    axiosMock.reset();
   });
 
   describe('Happy Path', function () {
-    it.only('should return 200 status code', async function () {
-      post.mockResolvedValue()
+    it('should return 200 status code', async function () {
+      validateLayerFilesExistsMock.mockResolvedValue(true);
+      validateShpFilesExistsMock.mockResolvedValue(true);
+      axiosMock.post.mockResolvedValue({});
       const validRequest = {
         sourceDirectory: 'testDir',
       };

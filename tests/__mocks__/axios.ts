@@ -1,1 +1,3 @@
-export const post = jest.fn();
+import mockAxios from 'jest-mock-axios';
+
+export default mockAxios;
