@@ -98,7 +98,12 @@ export class Trigger {
   private parseToMetadata(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, files: string[]): LayerMetadata {
     const metadataFeature = (metadataGeoJson as FeatureCollection).features[0];
     const metadataProperties = metadataFeature.properties as IMetaDataFeatureProperties;
+    const parts = metadataProperties.Source.split('-');
+    const version = parts.pop();
+    const id = parts.join('-');
     const metadata: LayerMetadata = {
+      id: id,
+      version: version,
       dsc: metadataProperties.Dsc,
       source: metadataProperties.Source,
       sourceName: metadataProperties.SourceName,
