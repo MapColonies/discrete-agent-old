@@ -10,9 +10,9 @@
         "UpdateDate": "06/03/2020",
         "Resolution": "0.1",
         "Ep90": "1",
-        "Rms": null,
+        "Rms": 1.3,
         "SensorType": "OTHER",
-        "Scale": null
+        "Scale": "1:3"
       },
       "geometry": {
         "type": "Polygon",

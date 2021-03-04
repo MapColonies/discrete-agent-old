@@ -1,40 +1,19 @@
 import * as path from 'path';
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { LayerMetadata, SensorType } from '@map-colonies/mc-model-types';
-import { GeoJSON, FeatureCollection } from 'geojson';
 import axios from 'axios';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
-
-interface IMetaDataFeatureProperties {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Dsc: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Source: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  SourceName: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  UpdateDate: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Resolution: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Ep90: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Rms: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  SensorType: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Scale: string;
-}
+import { MetadataMapper } from './metadataMapper';
 
 @injectable()
 export class Trigger {
   public constructor(
     private readonly shpParser: ShpParser,
     private readonly fileManager: FilesManager,
+    private readonly metadataMapper: MetadataMapper,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {}
@@ -53,7 +32,7 @@ export class Trigger {
     if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
       const filesGeoJson = await this.shpParser.parse(filesShp, filesDbf);
-      const files = this.parseFilesShpJson(filesGeoJson);
+      const files = this.metadataMapper.parseFilesShpJson(filesGeoJson);
       if (!(await this.fileManager.validateLayerFilesExists(directory, files))) {
         if (isManual) {
           this.handleManualMissingFilesError();
@@ -64,7 +43,7 @@ export class Trigger {
       const productGeoJson = await this.shpParser.parse(productShp, productDbf);
       const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
       //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
-      const metadata = this.parseToMetadata(productGeoJson, metaDataGeoJson, files);
+      const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
       this.logger.log('info', `Trigger overseer for id: ${metadata.source as string} version: ${metadata.version as string}`);
       const overseerUrlPath = this.config.get<string>('overseer.url');
       try {
@@ -93,40 +72,6 @@ export class Trigger {
     } else if (isManual) {
       this.handleManualMissingFilesError();
     }
-  }
-
-  private parseToMetadata(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, files: string[]): LayerMetadata {
-    const metadataFeature = (metadataGeoJson as FeatureCollection).features[0];
-    const metadataProperties = metadataFeature.properties as IMetaDataFeatureProperties;
-    const parts = metadataProperties.Source.split('-');
-    const version = parts.pop();
-    const id = parts.join('-');
-    const metadata: LayerMetadata = {
-      id: id,
-      version: version,
-      dsc: metadataProperties.Dsc,
-      source: metadataProperties.Source,
-      sourceName: metadataProperties.SourceName,
-      ep90: Number.parseFloat(metadataProperties.Ep90),
-      geometry: metadataFeature.geometry,
-      resolution: Number.parseFloat(metadataProperties.Resolution),
-      rms: Number.parseFloat(metadataProperties.Rms),
-      scale: metadataProperties.Scale,
-      sensorType: SensorType[metadataProperties.SensorType as keyof typeof SensorType],
-      fileUris: files,
-      updateDate: new Date(metadataProperties.UpdateDate),
-    };
-    return metadata;
-  }
-
-  private parseFilesShpJson(filesJson: GeoJSON): string[] {
-    const features = (filesJson as FeatureCollection).features;
-    const files = features.map((feature) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const file = feature.properties as { 'File Name': string; Format: string };
-      return `${file['File Name']}.${file.Format}`;
-    });
-    return files;
   }
 
   private handleManualMissingFilesError(): void {
