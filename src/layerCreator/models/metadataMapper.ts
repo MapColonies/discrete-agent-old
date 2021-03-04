@@ -1,7 +1,7 @@
 import { IPropSHPMapping, LayerMetadata, ShapeFileType } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
-import _ from 'lodash';
+import { get as readProp } from 'lodash';
 
 @injectable()
 export class MetadataMapper {
@@ -36,7 +36,7 @@ export class MetadataMapper {
     sources[ShapeFileType.PRODUCT] = productGeoJson;
     sources[ShapeFileType.SHAPE_METADATA] = metadataGeoJson;
     this.mappings.forEach((map) => {
-      metadata[map.prop] = _.get(sources[map.shpFile], map.valuePath);
+      metadata[map.prop] = readProp(sources[map.shpFile], map.valuePath);
     });
   }
 
