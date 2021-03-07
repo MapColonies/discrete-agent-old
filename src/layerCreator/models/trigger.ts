@@ -7,6 +7,7 @@ import { ILogger } from '../../common/interfaces';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
+import { OverseerClient } from '../../serviceClients/overseerClient';
 
 @injectable()
 export class Trigger {
@@ -14,6 +15,7 @@ export class Trigger {
     private readonly shpParser: ShpParser,
     private readonly fileManager: FilesManager,
     private readonly metadataMapper: MetadataMapper,
+    private readonly overseerClient: OverseerClient,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {}
@@ -44,19 +46,7 @@ export class Trigger {
       const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
       //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
       const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
-      this.logger.log('info', `Trigger overseer for id: ${metadata.source as string} version: ${metadata.version as string}`);
-      const overseerUrlPath = this.config.get<string>('overseer.url');
-      try {
-        await axios.post(`${overseerUrlPath}/layers`, metadata);
-      } catch (err) {
-        const error = err as Error;
-        this.logger.log(
-          'error',
-          `failed to trigger overseer for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
-        );
-        //TODO: add custom error
-        throw err;
-      }
+      await this.overseerClient.ingestDiscreteLayer(metadata);
 
       this.logger.log('info', `Update agent-DB history for id: ${metadata.source as string} version: ${metadata.version as string}`);
       const agentDBUrlPath = this.config.get<string>('agentDB.url');
