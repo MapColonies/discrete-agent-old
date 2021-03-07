@@ -24,5 +24,10 @@
   "agentDB": {
     "url": "AGENT_DB_URL"
   },
-  "externalReadinessUrl": "EXTERNAL_READINESS_URL"
+  "externalReadinessUrl": "EXTERNAL_READINESS_URL",
+  "httpRetry": {
+    "attempts": "HTTP_RETRY_ATTEMPTS",
+    "delay": "HTTP_RETRY_DELAY",
+    "shouldResetTimeout": "HTTP_RETRY_RESET_TIMEOUT"
+  }
 }
