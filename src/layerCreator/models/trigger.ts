@@ -4,10 +4,10 @@ import { inject, injectable } from 'tsyringe';
 import axios from 'axios';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
+import { OverseerClient } from '../../serviceClients/overseerClient';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
-import { OverseerClient } from '../../serviceClients/overseerClient';
 
 @injectable()
 export class Trigger {
