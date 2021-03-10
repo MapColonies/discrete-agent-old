@@ -3,6 +3,7 @@ import { GeoJSON } from 'geojson';
 import { inject, injectable } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
+import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 
 @injectable()
 export class ShpParser {
@@ -19,8 +20,7 @@ export class ShpParser {
     } catch (err) {
       const error = err as Error;
       this.logger.log('error', `failed to parse shapeFile: ${error.message}`);
-      //TODO: add custom error
-      throw err;
+      throw new BadRequestError(`Invalid shp file: ${shp}, err: ${error.message}`);
     }
   }
 }

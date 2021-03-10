@@ -2,7 +2,6 @@ import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Services } from '../common/constants';
-import { NotFoundError } from '../common/exceptions/http/notFoundError';
 import { ILogger } from '../common/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientBase/httpClient';
 
@@ -19,7 +18,6 @@ export class OverseerClient extends HttpClient {
 
   public async ingestDiscreteLayer(discreteLayerMetaData: LayerMetadata): Promise<LayerMetadata> {
     this.logger.log('info', `Trigger overseer for id: ${discreteLayerMetaData.id as string} version: ${discreteLayerMetaData.version as string}`);
-    const overseerUrlPath = this.config.get<string>('overseer.url');
     try {
       return await this.post('/layers', discreteLayerMetaData);
     } catch (err) {
@@ -30,7 +28,6 @@ export class OverseerClient extends HttpClient {
           error.message
         }`
       );
-      //TODO: add custom error
       throw err;
     }
   }
