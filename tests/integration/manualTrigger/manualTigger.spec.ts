@@ -8,12 +8,14 @@ import * as requestSender from './helpers/requestSender';
 
 describe('manualTrigger', function () {
   beforeAll(function () {
+    container.clearInstances();
     registerTestValues();
     requestSender.init();
+  });
+  beforeEach(() => {
     initShapeFileMock();
   });
   afterEach(function () {
-    container.clearInstances();
     jest.resetAllMocks();
     axiosMock.reset();
   });
@@ -41,6 +43,32 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(invalidRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 when tiff files are missing', async () => {
+      validateLayerFilesExistsMock.mockResolvedValue(false);
+      validateShpFilesExistsMock.mockResolvedValue(true);
+      axiosMock.post.mockResolvedValue({});
+      const validRequest = {
+        sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 when shp files are missing', async () => {
+      validateLayerFilesExistsMock.mockResolvedValue(true);
+      validateShpFilesExistsMock.mockResolvedValue(false);
+      axiosMock.post.mockResolvedValue({});
+      const validRequest = {
+        sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
