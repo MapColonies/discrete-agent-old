@@ -1,9 +1,8 @@
 import * as path from 'path';
-import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
 import axios from 'axios';
 import { Services } from '../../common/constants';
-import { ILogger } from '../../common/interfaces';
+import { ILogger, IConfig } from '../../common/interfaces';
 import { OverseerClient } from '../../serviceClients/overseerClient';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
