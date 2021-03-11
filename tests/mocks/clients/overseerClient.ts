@@ -2,8 +2,8 @@ import { OverseerClient } from '../../../src/serviceClients/overseerClient';
 
 const ingestDiscreteLayerMock = jest.fn();
 
-const OverseerClientMock = ({
-  ingestDiscreteLayer: ingestDiscreteLayerMock
+const overseerClientMock = ({
+  ingestDiscreteLayer: ingestDiscreteLayerMock,
 } as unknown) as OverseerClient;
 
-export { OverseerClientMock, ingestDiscreteLayerMock };
+export { overseerClientMock, ingestDiscreteLayerMock };
