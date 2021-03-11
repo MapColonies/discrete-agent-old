@@ -12,10 +12,14 @@
     "watchDirectory": "WATCH_DIRECTORY",
     "watchOptions": {
       "depth": "WATCH_DEPTH",
-      "awaitWriteFinish": "WATCH_AWAIT_WRITE_FINISH",
       "persistent": "WATCH_PERSISTENT",
       "useFsEvents": "WATCH_USE_FS_EVENTS",
-      "usePolling": "WATCH_USE_POLLING"
+      "usePolling": "WATCH_USE_POLLING",
+      "interval": "WATCH_INTERVAL",
+      "awaitWriteFinish": {
+        "stabilityThreshold": "WATCH_AWAIT_WRITE_FINISH_STABILITY_THRESHOLD",
+        "pollInterval": "WATCH_AWAIT_WRITE_FINISH_POLL_INTERVAL"
+      }
     }
   },
   "overseer": {
