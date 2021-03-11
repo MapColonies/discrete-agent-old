@@ -39,7 +39,15 @@ describe('trigger', () => {
       mapMock.mockReturnValue(expectedMetadata);
 
       // action
-      const trigger = new Trigger(shpParserMock, filesManagerMock, metadataMapperMock, overseerClientMock, agentDbClientMock, { log: jest.fn() }, configMock);
+      const trigger = new Trigger(
+        shpParserMock,
+        filesManagerMock,
+        metadataMapperMock,
+        overseerClientMock,
+        agentDbClientMock,
+        { log: jest.fn() },
+        configMock
+      );
       try {
         await trigger.trigger('test');
       } catch (exception) {
