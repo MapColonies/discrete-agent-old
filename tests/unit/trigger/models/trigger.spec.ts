@@ -5,6 +5,7 @@ import axiosMock from 'jest-mock-axios';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Trigger } from '../../../../src/layerCreator/models/trigger';
 import { overseerClientMock, ingestDiscreteLayerMock } from '../../../mocks/clients/overseerClient';
+import { agentDbClientMock, updateDiscreteStatusMock } from '../../../mocks/clients/agentDbClient';
 import { validateLayerFilesExistsMock, validateShpFilesExistsMock, filesManagerMock } from '../../../mocks/filesManager';
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
@@ -30,6 +31,7 @@ describe('trigger', () => {
       // set mock values
       axiosMock.post.mockResolvedValue({});
       ingestDiscreteLayerMock.mockResolvedValue({});
+      updateDiscreteStatusMock.mockResolvedValue({});
       parseMock.mockResolvedValue({});
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(true);
@@ -37,7 +39,7 @@ describe('trigger', () => {
       mapMock.mockReturnValue(expectedMetadata);
 
       // action
-      const trigger = new Trigger(shpParserMock, filesManagerMock, metadataMapperMock, overseerClientMock, { log: jest.fn() }, configMock);
+      const trigger = new Trigger(shpParserMock, filesManagerMock, metadataMapperMock, overseerClientMock, agentDbClientMock, { log: jest.fn() }, configMock);
       try {
         await trigger.trigger('test');
       } catch (exception) {
@@ -48,6 +50,8 @@ describe('trigger', () => {
       // expectation
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedMetadata);
+      expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(1);
+      expect(updateDiscreteStatusMock).toHaveBeenCalledWith(expectedMetadata);
     });
   });
 });

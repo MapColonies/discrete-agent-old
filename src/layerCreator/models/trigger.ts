@@ -6,6 +6,7 @@ import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { OverseerClient } from '../../serviceClients/overseerClient';
+import { AgentDbClient } from '../../serviceClients/agentDbClient';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
@@ -17,6 +18,7 @@ export class Trigger {
     private readonly fileManager: FilesManager,
     private readonly metadataMapper: MetadataMapper,
     private readonly overseerClient: OverseerClient,
+    private readonly agentDbClient: AgentDbClient,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {}
@@ -53,18 +55,7 @@ export class Trigger {
       }
       const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
       await this.overseerClient.ingestDiscreteLayer(metadata);
-
-      this.logger.log('info', `Update agent-DB history for id: ${metadata.source as string} version: ${metadata.version as string}`);
-      const agentDBUrlPath = this.config.get<string>('agentDB.url');
-      try {
-        await axios.post(`${agentDBUrlPath}/${metadata.source as string}/${metadata.version as string}`);
-      } catch (err) {
-        const error = err as Error;
-        this.logger.log(
-          'error',
-          `failed to update agent-DB for for id=${metadata.source as string} version=${metadata.version as string}, error=${error.message}`
-        );
-      }
+      await this.agentDbClient.updateDiscreteStatus(metadata);
     } else if (isManual) {
       throw new BadRequestError('some of the required shape files are missing');
     }
