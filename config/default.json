@@ -15,10 +15,14 @@
     "watchDirectory": "/watch/**/*.shp",
     "watchOptions": {
       "depth": 2,
-      "awaitWriteFinish": true,
       "persistent": true,
       "useFsEvents": false,
-      "usePolling": true
+      "usePolling": true,
+      "interval": 1000,
+      "awaitWriteFinish": {
+        "stabilityThreshold": 2000,
+        "pollInterval": 100
+      }
     }
   },
   "overseer": {
