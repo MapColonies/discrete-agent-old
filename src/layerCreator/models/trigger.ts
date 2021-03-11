@@ -1,8 +1,10 @@
 import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
 import axios from 'axios';
+import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
+import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { OverseerClient } from '../../serviceClients/overseerClient';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
@@ -32,18 +34,23 @@ export class Trigger {
     const metadataDbf = path.join(directory, 'ShapeMetadata.dbf');
     if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
-      const filesGeoJson = await this.shpParser.parse(filesShp, filesDbf);
+      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual);
+      if (!filesGeoJson) {
+        return;
+      }
       const files = this.metadataMapper.parseFilesShpJson(filesGeoJson);
       if (!(await this.fileManager.validateLayerFilesExists(directory, files))) {
         if (isManual) {
-          this.handleManualMissingFilesError();
+          throw new BadRequestError('some of the required files are missing');
         }
         return;
       }
       // parse all shp files and convert to model
-      const productGeoJson = await this.shpParser.parse(productShp, productDbf);
-      const metaDataGeoJson = await this.shpParser.parse(metadataShp, metadataDbf);
-      //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
+      const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual);
+      const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual);
+      if (!productGeoJson || !metaDataGeoJson) {
+        return;
+      }
       const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
       await this.overseerClient.ingestDiscreteLayer(metadata);
 
@@ -59,12 +66,20 @@ export class Trigger {
         );
       }
     } else if (isManual) {
-      this.handleManualMissingFilesError();
+      throw new BadRequestError('some of the required shape files are missing');
     }
   }
 
-  private handleManualMissingFilesError(): void {
-    //TODO: replace with custom error
-    throw new Error('missing files');
+  private async tryParseShp(shp: string, dbf: string, isManual: boolean): Promise<GeoJSON | undefined> {
+    try {
+      return await this.shpParser.parse(shp, dbf);
+    } catch (err) {
+      if (isManual) {
+        throw err;
+      } else {
+        //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
+        return undefined;
+      }
+    }
   }
 }
