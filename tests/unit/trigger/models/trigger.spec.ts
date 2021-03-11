@@ -13,7 +13,7 @@ import { configMock } from '../../../mocks/config';
 
 let expectedMetadata: LayerMetadata;
 
-describe('OverseerClient', () => {
+describe('trigger', () => {
   beforeEach(function () {
     const layerMetadataPath = resolve(__dirname, '../../../mockData/layerMetadata.json');
     const layerMetadataStr = readFileSync(layerMetadataPath, { encoding: 'utf8' });
@@ -25,7 +25,7 @@ describe('OverseerClient', () => {
     axiosMock.reset();
   });
 
-  describe('#OverseerClient', () => {
+  describe('#trigger', () => {
     it('Call overseer ingest Discrete Layer', async function () {
       // set mock values
       axiosMock.post.mockResolvedValue({});
