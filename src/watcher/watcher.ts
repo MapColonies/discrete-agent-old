@@ -4,6 +4,7 @@ import { inject, singleton } from 'tsyringe';
 import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
+import { DBClient } from '../serviceClients/dbClient';
 
 @singleton()
 export class Watcher {
@@ -13,41 +14,53 @@ export class Watcher {
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
+    private readonly dbClient: DBClient,
     private readonly trigger: Trigger
   ) {
     const watchDir = config.get<string>('watcher.watchDirectory');
     const watchOptions = config.get<WatchOptions>('watcher.watchOptions');
     this.watcher = watch(watchDir, watchOptions);
-    this.watching = true; //TODO: replace with getting watch status from persistent storage
+    this.watching = false;
+    void this.dbClient.getWatchStatus().then((data) => {
+      this.watching = data.isWatching;
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (this.watching) {
+        this.internalStartWatch();
+      }
+    });
     process.on('beforeExit', () => {
       void this.watcher.close();
     });
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (this.watching) {
-      this.startWatching();
-    }
   }
 
-  public stopWatching(): void {
+  public async stopWatching(): Promise<void> {
     if (this.watching) {
       this.logger.log('info', 'stopping file watcher');
-      //TODO: update persistent storage on status change
       this.watcher.removeAllListeners();
       this.watching = false;
+      await this.dbClient.setWatchStatus({
+        isWatching: this.watching,
+      });
     }
   }
 
-  public startWatching(): void {
+  public async startWatching(): Promise<void> {
     if (!this.watching) {
-      this.logger.log('info', 'starting file watcher');
-      //TODO: update persistent storage on status change
-      this.watcher.on('add', this.onAdd.bind(this));
-      this.watching = true;
+      this.internalStartWatch();
+      await this.dbClient.setWatchStatus({
+        isWatching: this.watching,
+      });
     }
   }
 
   public isWatching(): boolean {
     return this.watching;
+  }
+
+  private internalStartWatch(): void {
+    this.logger.log('info', 'starting file watcher');
+    this.watcher.on('add', this.onAdd.bind(this));
+    this.watching = true;
   }
 
   private onAdd(path: string): void {

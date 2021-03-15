@@ -1,3 +1,3 @@
-export interface IStatusResponse {
-  watching: boolean;
+export interface IWatchStatus {
+  isWatching: boolean;
 }
