@@ -20,6 +20,9 @@ export class Watcher {
     const watchDir = config.get<string>('watcher.watchDirectory');
     const watchOptions = config.get<WatchOptions>('watcher.watchOptions');
     this.watcher = watch(watchDir, watchOptions);
+    process.on('beforeExit', () => {
+      void this.watcher.close();
+    });
     this.watching = false;
     void this.dbClient.getWatchStatus().then((data) => {
       this.watching = data.isWatching;
@@ -28,9 +31,6 @@ export class Watcher {
         this.internalStartWatch();
       }
     });
-    process.on('beforeExit', () => {
-      void this.watcher.close();
-    });
   }
 
   public async stopWatching(): Promise<void> {
@@ -38,19 +38,19 @@ export class Watcher {
       this.logger.log('info', 'stopping file watcher');
       this.watcher.removeAllListeners();
       this.watching = false;
-      await this.dbClient.setWatchStatus({
-        isWatching: this.watching,
-      });
     }
+    await this.dbClient.setWatchStatus({
+      isWatching: this.watching,
+    });
   }
 
   public async startWatching(): Promise<void> {
     if (!this.watching) {
       this.internalStartWatch();
-      await this.dbClient.setWatchStatus({
-        isWatching: this.watching,
-      });
     }
+    await this.dbClient.setWatchStatus({
+      isWatching: this.watching,
+    });
   }
 
   public isWatching(): boolean {

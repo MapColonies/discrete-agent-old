@@ -73,7 +73,7 @@ describe('watchStatus', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(body.isWatching).toBe(true);
       expect(onMock).toHaveBeenCalledTimes(0);
-      expect(setWatchStatusMock).toHaveBeenCalledTimes(0);
+      expect(setWatchStatusMock).toHaveBeenCalledTimes(1);
     });
 
     it('stop should stop watcher when watching', async function () {
@@ -97,7 +97,7 @@ describe('watchStatus', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(body.isWatching).toBe(false);
       expect(removeAllListenersMock).toHaveBeenCalledTimes(0);
-      expect(setWatchStatusMock).toHaveBeenCalledTimes(0);
+      expect(setWatchStatusMock).toHaveBeenCalledTimes(1);
     });
   });
 });
