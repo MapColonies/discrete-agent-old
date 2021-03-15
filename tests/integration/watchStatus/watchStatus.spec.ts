@@ -3,7 +3,7 @@ import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
 // eslint-disable-next-line jest/no-mocks-import
 import { removeAllListenersMock, onMock, resetMocks } from '../../__mocks__/chokidar';
-import { getWatchStatusMock, setWatchStatusMock } from '../../mocks/clients/dbClient';
+import { getWatchStatusMock, setWatchStatusMock } from '../../mocks/clients/agentDbClient';
 import { Watcher } from '../../../src/watcher/watcher';
 import * as requestSender from './helpers/requestSender';
 

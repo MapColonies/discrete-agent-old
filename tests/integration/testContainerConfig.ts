@@ -5,8 +5,8 @@ import { MCLogger, IServiceConfig } from '@map-colonies/mc-logger';
 import { Services } from '../../src/common/constants';
 import { FilesManager } from '../../src/layerCreator/models/filesManager';
 import { filesManagerMock } from '../mocks/filesManager';
-import { DBClient } from '../../src/serviceClients/dbClient';
-import { dbClientMock, init as initDb } from '../mocks/clients/dbClient';
+import { AgentDbClient } from '../../src/serviceClients/agentDbClient';
+import { agentDbClientMock, init as initDb } from '../mocks/clients/agentDbClient';
 
 function registerTestValues(): void {
   const packageContent = readFileSync('./package.json', 'utf8');
@@ -18,7 +18,7 @@ function registerTestValues(): void {
   container.register(Services.CONFIG, { useValue: config });
   container.register(Services.LOGGER, { useValue: logger });
   container.register(FilesManager, { useValue: filesManagerMock });
-  container.register(DBClient, { useValue: dbClientMock });
+  container.register(AgentDbClient, { useValue: agentDbClientMock });
 }
 
 export { registerTestValues };

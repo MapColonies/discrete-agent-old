@@ -4,7 +4,7 @@ import { inject, singleton } from 'tsyringe';
 import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
-import { DBClient } from '../serviceClients/dbClient';
+import { AgentDbClient } from '../serviceClients/agentDbClient';
 
 @singleton()
 export class Watcher {
@@ -14,7 +14,7 @@ export class Watcher {
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
-    private readonly dbClient: DBClient,
+    private readonly dbClient: AgentDbClient,
     private readonly trigger: Trigger
   ) {
     const watchDir = config.get<string>('watcher.watchDirectory');
