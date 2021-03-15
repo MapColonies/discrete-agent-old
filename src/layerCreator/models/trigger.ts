@@ -1,6 +1,5 @@
 import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
-import axios from 'axios';
 import { GeoJSON } from 'geojson';
 import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
