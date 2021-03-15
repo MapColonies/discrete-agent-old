@@ -3,6 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
+import { IWatchStatus } from '../watchStatus/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientBase/httpClient';
 
 @injectable()
@@ -31,6 +32,26 @@ export class AgentDbClient extends HttpClient {
           error.message
         }`
       );
+      throw err;
+    }
+  }
+
+  public async getWatchStatus(): Promise<IWatchStatus> {
+    try {
+      return await this.get('/status');
+    } catch (err) {
+      const error = err as Error;
+      this.logger.log('error', `failed to retrieve watch status from db, error=${error.message}`);
+      throw err;
+    }
+  }
+
+  public async setWatchStatus(status: IWatchStatus): Promise<IWatchStatus> {
+    try {
+      return await this.put('/status', status);
+    } catch (err) {
+      const error = err as Error;
+      this.logger.log('error', `failed to retrieve watch status from db, error=${error.message}`);
       throw err;
     }
   }
