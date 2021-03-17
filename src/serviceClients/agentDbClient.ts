@@ -1,9 +1,12 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import httpStatus from 'http-status-codes';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
 import { IWatchStatus } from '../watchStatus/interfaces';
+import { HistoryStatus } from '../layerCreator/historyStatus';
+import { HttpError } from '../common/exceptions/http/httpError';
+import { ILayerHistory } from '../layerCreator/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientBase/httpClient';
 
 @injectable()
@@ -17,21 +20,47 @@ export class AgentDbClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('agentDB.url');
   }
 
-  public async updateDiscreteStatus(discreteLayerMetaData: LayerMetadata): Promise<LayerMetadata> {
-    this.logger.log(
-      'info',
-      `Update agent-DB history for id: ${discreteLayerMetaData.id as string} version: ${discreteLayerMetaData.version as string}`
-    );
+  public async getDiscreteStatus(directory: string): Promise<ILayerHistory | undefined> {
+    this.logger.log('debug', `getting history record for  ${directory}`);
     try {
-      return await this.post(`${discreteLayerMetaData.id as string}/${discreteLayerMetaData.version as string}`);
+      const encodedDirectory = encodeURIComponent(directory);
+      return await this.get(`layer/${encodedDirectory}`);
+    } catch (err) {
+      const error = err as HttpError;
+      if (error.status == httpStatus.NOT_FOUND) {
+        return undefined;
+      } else {
+        this.logger.log('error', `failed to retrieve history record for ${directory}, error=${error.message}`);
+        throw err;
+      }
+    }
+  }
+
+  public async createDiscreteStatus(directory: string): Promise<ILayerHistory> {
+    this.logger.log('info', `creating history record for ${directory}`);
+    try {
+      const encodedDirectory = encodeURIComponent(directory);
+      return await this.post(`layer/${encodedDirectory}`);
     } catch (err) {
       const error = err as Error;
-      this.logger.log(
-        'error',
-        `failed to update agent-DB for for id=${discreteLayerMetaData.id as string} version=${discreteLayerMetaData.version as string}, error=${
-          error.message
-        }`
-      );
+      this.logger.log('error', `failed to create history record for ${directory}, error=${error.message}`);
+      throw err;
+    }
+  }
+
+  public async updateDiscreteStatus(directory: string, status?: HistoryStatus, id?: string, version?: string): Promise<ILayerHistory> {
+    this.logger.log('info', `Update agent-DB history for ${directory}`);
+    try {
+      const encodedDirectory = encodeURIComponent(directory);
+      const body = {
+        status: status,
+        id: id,
+        version: version,
+      };
+      return await this.put(`layer/${encodedDirectory}`, body);
+    } catch (err) {
+      const error = err as Error;
+      this.logger.log('error', `failed to update agent-DB for ${directory}, error=${error.message}`);
       throw err;
     }
   }
