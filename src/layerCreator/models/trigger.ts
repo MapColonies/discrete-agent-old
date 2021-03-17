@@ -6,6 +6,7 @@ import { ILogger, IConfig } from '../../common/interfaces';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { OverseerClient } from '../../serviceClients/overseerClient';
 import { AgentDbClient } from '../../serviceClients/agentDbClient';
+import { HistoryStatus } from '../historyStatus';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
@@ -23,9 +24,17 @@ export class Trigger {
   ) {}
 
   public async trigger(directory: string, isManual = false): Promise<void> {
-    //TODO: get history
-    //TODO: if history don't exists create it
-    //TODO: if history is not pending exit
+    const status = await this.agentDbClient.getDiscreteStatus(directory);
+    if (status === undefined) {
+      await this.agentDbClient.createDiscreteStatus(directory);
+    } else if (status.status === HistoryStatus.TRIGGERED || status.status === HistoryStatus.FAILED) {
+      if (!isManual) {
+        this.logger.log('debug', `skipping directory ${directory} its status is ${status.status}`);
+        return;
+      } else {
+        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.IN_PROGRESS);
+      }
+    }
     //check if all shp files exists
     const filesShp = path.join(directory, 'Files.shp');
     const filesDbf = path.join(directory, 'Files.dbf');
@@ -42,6 +51,7 @@ export class Trigger {
       const files = this.metadataMapper.parseFilesShpJson(filesGeoJson);
       if (!(await this.fileManager.validateLayerFilesExists(directory, files))) {
         if (isManual) {
+          await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED);
           throw new BadRequestError('some of the required files are missing');
         }
         return;
@@ -53,9 +63,17 @@ export class Trigger {
         return;
       }
       const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
-      await this.overseerClient.ingestDiscreteLayer(metadata);
-      await this.agentDbClient.updateDiscreteStatus(metadata);
+      try {
+        await this.overseerClient.ingestDiscreteLayer(metadata);
+        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.TRIGGERED, metadata.id, metadata.version);
+      } catch (err) {
+        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED, metadata.id, metadata.version);
+        if (isManual) {
+          throw err;
+        }
+      }
     } else if (isManual) {
+      await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED);
       throw new BadRequestError('some of the required shape files are missing');
     }
   }
