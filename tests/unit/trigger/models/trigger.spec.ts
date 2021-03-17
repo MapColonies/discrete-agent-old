@@ -78,6 +78,7 @@ describe('trigger', () => {
       await trigger.trigger('test');
 
       // expectation
+      expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(0);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(0);
     });
@@ -99,6 +100,7 @@ describe('trigger', () => {
       await trigger.trigger('test');
 
       // expectation
+      expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(0);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(0);
     });
@@ -129,6 +131,7 @@ describe('trigger', () => {
       await trigger.trigger('test', true);
 
       // expectation
+      expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(2);
     });
@@ -159,6 +162,7 @@ describe('trigger', () => {
       await trigger.trigger('test', true);
 
       // expectation
+      expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(2);
     });
