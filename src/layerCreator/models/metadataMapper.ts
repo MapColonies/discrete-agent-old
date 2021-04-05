@@ -13,7 +13,6 @@ export class MetadataMapper {
 
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): LayerMetadata {
     const metadata: LayerMetadata = {};
-    metadata.fileUris = this.parseFilesShpJson(filesGeoJson);
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson);
     this.parseIdentifiers(metadata);
     return metadata;

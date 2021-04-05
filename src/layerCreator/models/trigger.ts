@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
+import { IngestionParams } from '@map-colonies/mc-model-types';
 import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
 import { BadRequestError } from '../../common/exceptions/http/badRequestError';
@@ -62,12 +63,16 @@ export class Trigger {
       if (!productGeoJson || !metaDataGeoJson) {
         return;
       }
-      const metadata = this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson);
+      const ingestionData: IngestionParams = {
+        fileNames: this.metadataMapper.parseFilesShpJson(filesGeoJson),
+        metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson),
+        originDirectory: directory,
+      };
       try {
-        await this.overseerClient.ingestDiscreteLayer(metadata);
-        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.TRIGGERED, metadata.id, metadata.version);
+        await this.overseerClient.ingestDiscreteLayer(ingestionData);
+        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.TRIGGERED, ingestionData.metadata.id, ingestionData.metadata.version);
       } catch (err) {
-        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED, metadata.id, metadata.version);
+        await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED, ingestionData.metadata.id, ingestionData.metadata.version);
         if (isManual) {
           throw err;
         }

@@ -1,6 +1,6 @@
 import { IConfig } from 'config';
 import { inject, injectable } from 'tsyringe';
-import { LayerMetadata } from '@map-colonies/mc-model-types';
+import { LayerMetadata, IngestionParams } from '@map-colonies/mc-model-types';
 import { Services } from '../common/constants';
 import { ILogger } from '../common/interfaces';
 import { HttpClient, IHttpRetryConfig, parseConfig } from './clientBase/httpClient';
@@ -16,15 +16,15 @@ export class OverseerClient extends HttpClient {
     this.axiosOptions.baseURL = config.get<string>('overseer.url');
   }
 
-  public async ingestDiscreteLayer(discreteLayerMetaData: LayerMetadata): Promise<LayerMetadata> {
-    this.logger.log('info', `Trigger overseer for id: ${discreteLayerMetaData.id as string} version: ${discreteLayerMetaData.version as string}`);
+  public async ingestDiscreteLayer(ingestionData: IngestionParams): Promise<LayerMetadata> {
+    this.logger.log('info', `Trigger overseer for id: ${ingestionData.metadata.id as string} version: ${ingestionData.metadata.version as string}`);
     try {
-      return await this.post('/layers', discreteLayerMetaData);
+      return await this.post('/layers', ingestionData);
     } catch (err) {
       const error = err as Error;
       this.logger.log(
         'error',
-        `failed to trigger overseer for for id=${discreteLayerMetaData.id as string} version=${discreteLayerMetaData.version as string}, error=${
+        `failed to trigger overseer for for id=${ingestionData.metadata.id as string} version=${ingestionData.metadata.version as string}, error=${
           error.message
         }`
       );
