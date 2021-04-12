@@ -1,7 +1,7 @@
-import { IPropSHPMapping, LayerMetadata, ShapeFileType } from '@map-colonies/mc-model-types';
+import { IPropSHPMapping, LayerMetadata, ShapeFileType, TsTypes } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
-import { get as readProp } from 'lodash';
+import { get as readProp, toNumber } from 'lodash';
 
 @injectable()
 export class MetadataMapper {
@@ -13,7 +13,6 @@ export class MetadataMapper {
 
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): LayerMetadata {
     const metadata: LayerMetadata = {};
-    metadata.fileUris = this.parseFilesShpJson(filesGeoJson);
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson);
     this.parseIdentifiers(metadata);
     return metadata;
@@ -36,7 +35,9 @@ export class MetadataMapper {
     sources[ShapeFileType.PRODUCT] = productGeoJson;
     sources[ShapeFileType.SHAPE_METADATA] = metadataGeoJson;
     this.mappings.forEach((map) => {
-      metadata[map.prop] = readProp(sources[map.shpFile], map.valuePath);
+      const type = map.mappingType;
+      const value = readProp(sources[map.shpFile], map.valuePath) as unknown;
+      metadata[map.prop] = this.castValue(value, type);
     });
   }
 
@@ -45,5 +46,36 @@ export class MetadataMapper {
     const parts = source.split('-');
     metadata.version = parts.pop();
     metadata.id = parts.join('-');
+  }
+
+  private castValue(value: unknown, type: TsTypes): unknown {
+    if (value === undefined) {
+      return undefined;
+    }
+    switch (type) {
+      case TsTypes.BOOLEAN:
+        return this.toBoolean(value);
+      case TsTypes.DATE:
+        return new Date(value as string);
+      case TsTypes.NUMBER:
+        return toNumber(value);
+      default:
+        return value;
+    }
+  }
+
+  private toBoolean(value: unknown): boolean {
+    switch (typeof value) {
+      case 'boolean':
+        return value;
+      case 'number':
+      case 'bigint':
+        return value !== 0;
+      default:
+        if ((value as string).toLowerCase() === 'true') {
+          return true;
+        }
+        return false;
+    }
   }
 }

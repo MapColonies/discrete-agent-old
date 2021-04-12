@@ -9,20 +9,46 @@ import { validateLayerFilesExistsMock, validateShpFilesExistsMock, filesManagerM
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 
-import { configMock } from '../../../mocks/config';
+import { configMock, getMock } from '../../../mocks/config';
 import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
 
 const expectedMetadata = loadTestMetadata();
+const expectedParams = loadTestIngestionParams();
 const baseHistoryStatus = {
   directory: 'test',
   status: HistoryStatus.IN_PROGRESS,
   id: expectedMetadata.id,
   version: expectedMetadata.version,
 };
+const fileList = [
+  'X1825_Y1649.Tiff',
+  'X1825_Y1650.Tiff',
+  'X1825_Y1651.Tiff',
+  'X1826_Y1649.Tiff',
+  'X1826_Y1650.Tiff',
+  'X1826_Y1651.Tiff',
+  'X1827_Y1649.Tiff',
+  'X1827_Y1650.Tiff',
+  'X1827_Y1651.Tiff',
+  'X1828_Y1649.Tiff',
+  'X1828_Y1650.Tiff',
+  'X1828_Y1651.Tiff',
+];
 const triggeredHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.TRIGGERED };
 const failedHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.FAILED };
 
 describe('trigger', () => {
+  beforeEach(() => {
+    getMock.mockImplementation((key) => {
+      switch (key) {
+        case 'mountDir':
+          return '/mountDir';
+        default:
+          return undefined;
+      }
+    });
+  });
+
   afterEach(function () {
     jest.resetAllMocks();
     axiosMock.reset();
@@ -38,7 +64,7 @@ describe('trigger', () => {
       parseMock.mockResolvedValue({});
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(true);
-      parseFilesShpJsonMock.mockReturnValue(['file.tiff']);
+      parseFilesShpJsonMock.mockReturnValue(fileList);
       mapMock.mockReturnValue(expectedMetadata);
 
       const trigger = new Trigger(
@@ -52,11 +78,11 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
-      expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedMetadata);
+      expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedParams);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(updateDiscreteStatusMock).toHaveBeenCalledWith('test', HistoryStatus.TRIGGERED, expectedMetadata.id, expectedMetadata.version);
     });
@@ -75,7 +101,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -97,7 +123,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -128,7 +154,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test', true);
+      await trigger.trigger('/mountDir/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -159,7 +185,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test', true);
+      await trigger.trigger('/mountDir/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -171,6 +197,15 @@ describe('trigger', () => {
 
 function loadTestMetadata(): LayerMetadata {
   const layerMetadataPath = resolve(__dirname, '../../../mockData/layerMetadata.json');
-  const layerMetadataStr = readFileSync(layerMetadataPath, { encoding: 'utf8' });
-  return (JSON.parse(layerMetadataStr) as unknown) as LayerMetadata;
+  return loadJson(layerMetadataPath) as LayerMetadata;
+}
+
+function loadTestIngestionParams(): LayerMetadata {
+  const layerMetadataPath = resolve(__dirname, '../../../mockData/ingestionParams.json');
+  return loadJson(layerMetadataPath) as LayerMetadata;
+}
+
+function loadJson(path: string): unknown {
+  const content = readFileSync(path, { encoding: 'utf8' });
+  return JSON.parse(content) as unknown;
 }
