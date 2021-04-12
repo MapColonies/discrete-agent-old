@@ -46,4 +46,5 @@ function loadTestData() {
   productGeoJson = (JSON.parse(productStr) as unknown) as GeoJSON;
   metadataGeoJson = (JSON.parse(geoJsonMetadataStr) as unknown) as GeoJSON;
   expectedMetadata = (JSON.parse(layerMetadataStr) as unknown) as LayerMetadata;
+  expectedMetadata.updateDate = new Date((expectedMetadata.updateDate as unknown) as string);
 }

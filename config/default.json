@@ -11,8 +11,9 @@
   "server": {
     "port": "8080"
   },
+  "mountDir": "/layerSources",
   "watcher": {
-    "watchDirectory": "/watch/**/*.shp",
+    "watchDirectory": "watch/**/*",
     "watchOptions": {
       "depth": 2,
       "persistent": true,

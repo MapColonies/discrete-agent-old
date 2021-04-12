@@ -9,7 +9,7 @@ import { validateLayerFilesExistsMock, validateShpFilesExistsMock, filesManagerM
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 
-import { configMock } from '../../../mocks/config';
+import { configMock, getMock } from '../../../mocks/config';
 import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
 
 const expectedMetadata = loadTestMetadata();
@@ -38,6 +38,17 @@ const triggeredHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.TRI
 const failedHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.FAILED };
 
 describe('trigger', () => {
+  beforeEach(() => {
+    getMock.mockImplementation((key) => {
+      switch (key) {
+        case 'mountDir':
+          return '/mountDir';
+        default:
+          return undefined;
+      }
+    });
+  });
+
   afterEach(function () {
     jest.resetAllMocks();
     axiosMock.reset();
@@ -67,7 +78,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
@@ -90,7 +101,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -112,7 +123,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test');
+      await trigger.trigger('/mountDir/test');
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -143,7 +154,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test', true);
+      await trigger.trigger('/mountDir/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -174,7 +185,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('test', true);
+      await trigger.trigger('/mountDir/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);

@@ -24,7 +24,7 @@ export class AgentDbClient extends HttpClient {
     this.logger.log('debug', `getting history record for  ${directory}`);
     try {
       const encodedDirectory = encodeURIComponent(directory);
-      return await this.get(`layer/${encodedDirectory}`);
+      return await this.get(`layers/${encodedDirectory}`);
     } catch (err) {
       const error = err as HttpError;
       if (error.status == httpStatus.NOT_FOUND) {
@@ -40,7 +40,7 @@ export class AgentDbClient extends HttpClient {
     this.logger.log('info', `creating history record for ${directory}`);
     try {
       const encodedDirectory = encodeURIComponent(directory);
-      return await this.post(`layer/${encodedDirectory}`);
+      return await this.post(`layers/${encodedDirectory}`);
     } catch (err) {
       const error = err as Error;
       this.logger.log('error', `failed to create history record for ${directory}, error=${error.message}`);
@@ -57,7 +57,7 @@ export class AgentDbClient extends HttpClient {
         id: id,
         version: version,
       };
-      return await this.put(`layer/${encodedDirectory}`, body);
+      return await this.put(`layers/${encodedDirectory}`, body);
     } catch (err) {
       const error = err as Error;
       this.logger.log('error', `failed to update agent-DB for ${directory}, error=${error.message}`);
