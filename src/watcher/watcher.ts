@@ -6,6 +6,7 @@ import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
 import { AgentDbClient } from '../serviceClients/agentDbClient';
+import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
 
 @singleton()
 export class Watcher {
@@ -16,7 +17,8 @@ export class Watcher {
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly dbClient: AgentDbClient,
-    private readonly trigger: Trigger
+    private readonly trigger: Trigger,
+    private readonly lock: LimitingLock
   ) {
     const mountDir = config.get<string>('mountDir');
     const watchDir = config.get<string>('watcher.watchDirectory');
@@ -95,9 +97,16 @@ export class Watcher {
 
   private onAdd(path: string): void {
     const dir = dirname(path);
-    void this.trigger.trigger(dir).catch((err) => {
-      const error = err as Error;
-      this.logger.log('error', `failed to trigger layer for ${path}. error: ${error.message}`);
-    });
+    const action = async (done: AsyncLockDoneCallback<void>): Promise<void> => {
+      try {
+        await this.trigger.trigger(dir);
+        return done();
+      } catch (err) {
+        const error = err as Error;
+        this.logger.log('error', `failed to trigger layer for ${path}. error: ${error.message}`);
+        return done(err);
+      }
+    };
+    void this.lock.acquire(dir, action);
   }
 }
