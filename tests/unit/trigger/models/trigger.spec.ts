@@ -8,6 +8,7 @@ import { agentDbClientMock, updateDiscreteStatusMock, getDiscreteStatusMock } fr
 import { validateLayerFilesExistsMock, validateShpFilesExistsMock, filesManagerMock } from '../../../mocks/filesManager';
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
+import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 
 import { configMock, getMock } from '../../../mocks/config';
 import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
@@ -37,21 +38,18 @@ const fileList = [
 const triggeredHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.TRIGGERED };
 const failedHistoryStatus = { ...baseHistoryStatus, status: HistoryStatus.FAILED };
 
+let configData: { [key: string]: unknown } = {};
+
 describe('trigger', () => {
   beforeEach(() => {
-    getMock.mockImplementation((key) => {
-      switch (key) {
-        case 'mountDir':
-          return '/mountDir';
-        default:
-          return undefined;
-      }
-    });
+    configData['mountDir'] = '/mountDir';
+    getMock.mockImplementation((key: string) => configData[key]);
   });
 
   afterEach(function () {
     jest.resetAllMocks();
     axiosMock.reset();
+    configData = {};
   });
 
   describe('#trigger', () => {
@@ -73,6 +71,7 @@ describe('trigger', () => {
         metadataMapperMock,
         overseerClientMock,
         agentDbClientMock,
+        lockMock,
         { log: jest.fn() },
         configMock
       );
@@ -81,6 +80,7 @@ describe('trigger', () => {
       await trigger.trigger('/mountDir/test');
 
       // expectation
+      expect(parseMock).toHaveBeenCalledTimes(3);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedParams);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -96,6 +96,7 @@ describe('trigger', () => {
         metadataMapperMock,
         overseerClientMock,
         agentDbClientMock,
+        lockMock,
         { log: jest.fn() },
         configMock
       );
@@ -118,6 +119,7 @@ describe('trigger', () => {
         metadataMapperMock,
         overseerClientMock,
         agentDbClientMock,
+        lockMock,
         { log: jest.fn() },
         configMock
       );
@@ -149,6 +151,7 @@ describe('trigger', () => {
         metadataMapperMock,
         overseerClientMock,
         agentDbClientMock,
+        lockMock,
         { log: jest.fn() },
         configMock
       );
@@ -180,6 +183,7 @@ describe('trigger', () => {
         metadataMapperMock,
         overseerClientMock,
         agentDbClientMock,
+        lockMock,
         { log: jest.fn() },
         configMock
       );
@@ -191,6 +195,42 @@ describe('trigger', () => {
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('auto trigger will retry parsing invalid shp files if only one task is queued', async function () {
+      // set mock values
+      validateLayerFilesExistsMock.mockResolvedValue(true);
+      validateShpFilesExistsMock.mockResolvedValue(true);
+      getDiscreteStatusMock.mockResolvedValue(undefined);
+      isQueueEmptyMock.mockReturnValue(true);
+      parseMock.mockRejectedValue(new Error('tests'));
+      configData['watcher.shpRetry'] = {
+        retries: 4,
+        factor: 2,
+        minTimeout: 1,
+        maxTimeout: 10,
+        randomize: false,
+      };
+
+      const trigger = new Trigger(
+        shpParserMock,
+        filesManagerMock,
+        metadataMapperMock,
+        overseerClientMock,
+        agentDbClientMock,
+        lockMock,
+        { log: jest.fn() },
+        configMock
+      );
+
+      // action
+      const action = async () => {
+        await trigger.trigger('/mountDir/test');
+      };
+
+      // expectation
+      await expect(action).rejects.toThrow();
+      expect(parseMock).toHaveBeenCalledTimes(5);
     });
   });
 });

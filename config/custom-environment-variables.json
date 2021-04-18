@@ -21,6 +21,13 @@
         "stabilityThreshold": "WATCH_AWAIT_WRITE_FINISH_STABILITY_THRESHOLD",
         "pollInterval": "WATCH_AWAIT_WRITE_FINISH_POLL_INTERVAL"
       }
+    },
+    "shpRetry": {
+      "retries": "WATCHER_SHP_RETRY_COUNT",
+      "factor": "WATCHER_SHP_RETRY_FACTOR",
+      "minTimeout": "WATCHER_SHP_RETRY_MIN_TIMEOUT",
+      "maxTimeout": "WATCHER_SHP_RETRY_MAX_TIMEOUT",
+      "randomize": "WATCHER_SHP_RETRY_RANDOMIZE"
     }
   },
   "overseer": {

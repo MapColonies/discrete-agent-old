@@ -26,4 +26,8 @@ export class LimitingLock {
     }
     return this.lock.acquire<T>(key, fn);
   }
+
+  public isQueueEmpty(key: string): boolean {
+    return this.tasksQueues[key] === undefined || this.tasksQueues[key]?.length === 0;
+  }
 }

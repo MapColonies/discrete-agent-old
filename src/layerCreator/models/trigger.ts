@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
+import retry from 'async-retry';
 import { IngestionParams } from '@map-colonies/mc-model-types';
 import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
@@ -8,6 +9,7 @@ import { BadRequestError } from '../../common/exceptions/http/badRequestError';
 import { OverseerClient } from '../../serviceClients/overseerClient';
 import { AgentDbClient } from '../../serviceClients/agentDbClient';
 import { HistoryStatus } from '../historyStatus';
+import { LimitingLock } from '../../watcher/limitingLock';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
@@ -15,6 +17,7 @@ import { MetadataMapper } from './metadataMapper';
 @injectable()
 export class Trigger {
   private readonly mountDir: string;
+  private readonly retryOptions: retry.Options;
 
   public constructor(
     private readonly shpParser: ShpParser,
@@ -22,10 +25,12 @@ export class Trigger {
     private readonly metadataMapper: MetadataMapper,
     private readonly overseerClient: OverseerClient,
     private readonly agentDbClient: AgentDbClient,
+    private readonly lock: LimitingLock,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {
     this.mountDir = config.get<string>('mountDir');
+    this.retryOptions = config.get<retry.Options>('watcher.shpRetry');
   }
 
   public async trigger(directory: string, isManual = false): Promise<void> {
@@ -51,7 +56,7 @@ export class Trigger {
     const metadataDbf = path.join(directory, 'ShapeMetadata.dbf');
     if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
-      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual);
+      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, directory);
       if (!filesGeoJson) {
         return;
       }
@@ -64,8 +69,8 @@ export class Trigger {
         return;
       }
       // parse all shp files and convert to model
-      const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual);
-      const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual);
+      const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual, directory);
+      const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual, directory);
       if (!productGeoJson || !metaDataGeoJson) {
         return;
       }
@@ -89,16 +94,23 @@ export class Trigger {
     }
   }
 
-  private async tryParseShp(shp: string, dbf: string, isManual: boolean): Promise<GeoJSON | undefined> {
-    try {
-      return await this.shpParser.parse(shp, dbf);
-    } catch (err) {
-      if (isManual) {
-        throw err;
-      } else {
-        //TODO: add error handling for parsing failure (due to invalid file or file still being copied)
-        return undefined;
+  private async tryParseShp(shp: string, dbf: string, isManual: boolean, directory: string): Promise<GeoJSON | undefined> {
+    const res = await retry(async (bail) => {
+      try {
+        return await this.shpParser.parse(shp, dbf);
+      } catch (err) {
+        if (isManual) {
+          //throw error to user on manual trigger
+          bail(err);
+        } else if (this.lock.isQueueEmpty(directory)) {
+          //trigger retry only when it was triggered by watcher and it is the last file that was copied to watch dir
+          throw err;
+        } else {
+          //ignore error if new files ware added to target dir after this trigger
+          return undefined;
+        }
       }
-    }
+    }, this.retryOptions);
+    return res;
   }
 }
