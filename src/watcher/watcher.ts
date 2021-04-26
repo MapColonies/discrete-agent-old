@@ -6,6 +6,7 @@ import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
 import { AgentDbClient } from '../serviceClients/agentDbClient';
+import { toBoolean } from '../common/utilities/typeConvertors';
 import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
 
 @singleton()
@@ -69,23 +70,31 @@ export class Watcher {
     if (watchOptions.depth != undefined) {
       watchOptions.depth = toInteger(watchOptions.depth);
     }
+    if (watchOptions.persistent != undefined) {
+      watchOptions.persistent = toBoolean(watchOptions.persistent);
+    }
+    if (watchOptions.useFsEvents != undefined) {
+      watchOptions.useFsEvents = toBoolean(watchOptions.useFsEvents);
+    }
+    if (watchOptions.usePolling != undefined) {
+      watchOptions.usePolling = toBoolean(watchOptions.usePolling);
+    }
     if (watchOptions.interval != undefined) {
       watchOptions.interval = toInteger(watchOptions.interval);
     }
-    if (
-      watchOptions.awaitWriteFinish != undefined &&
-      typeof watchOptions.awaitWriteFinish != 'boolean' &&
-      watchOptions.awaitWriteFinish.stabilityThreshold != undefined
-    ) {
-      watchOptions.awaitWriteFinish.stabilityThreshold = toInteger(watchOptions.awaitWriteFinish.stabilityThreshold);
+    if (watchOptions.awaitWriteFinish != undefined) {
+      if (typeof watchOptions.awaitWriteFinish === 'object') {
+        if (watchOptions.awaitWriteFinish.stabilityThreshold != undefined) {
+          watchOptions.awaitWriteFinish.stabilityThreshold = toInteger(watchOptions.awaitWriteFinish.stabilityThreshold);
+        }
+        if (watchOptions.awaitWriteFinish.pollInterval != undefined) {
+          watchOptions.awaitWriteFinish.pollInterval = toInteger(watchOptions.awaitWriteFinish.pollInterval);
+        }
+      } else {
+        watchOptions.awaitWriteFinish = toBoolean(watchOptions.awaitWriteFinish);
+      }
     }
-    if (
-      watchOptions.awaitWriteFinish != undefined &&
-      typeof watchOptions.awaitWriteFinish != 'boolean' &&
-      watchOptions.awaitWriteFinish.pollInterval != undefined
-    ) {
-      watchOptions.awaitWriteFinish.pollInterval = toInteger(watchOptions.awaitWriteFinish.pollInterval);
-    }
+
     return watchOptions;
   }
 
@@ -99,6 +108,7 @@ export class Watcher {
     const dir = dirname(path);
     const action = async (done: AsyncLockDoneCallback<void>): Promise<void> => {
       try {
+        this.logger.log('debug', `starting trigger flow for ${dir}`);
         await this.trigger.trigger(dir);
         return done();
       } catch (err) {
@@ -107,6 +117,7 @@ export class Watcher {
         return done(err);
       }
     };
+    this.logger.log('debug', `watch triggered for ${path}`);
     void this.lock.acquire(dir, action);
   }
 }

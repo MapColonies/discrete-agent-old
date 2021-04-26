@@ -2,6 +2,7 @@ import { IPropSHPMapping, LayerMetadata, ShapeFileType, TsTypes } from '@map-col
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
 import { get as readProp, toNumber } from 'lodash';
+import { toBoolean } from '../../common/utilities/typeConvertors';
 
 @injectable()
 export class MetadataMapper {
@@ -54,28 +55,13 @@ export class MetadataMapper {
     }
     switch (type) {
       case TsTypes.BOOLEAN:
-        return this.toBoolean(value);
+        return toBoolean(value);
       case TsTypes.DATE:
         return new Date(value as string);
       case TsTypes.NUMBER:
         return toNumber(value);
       default:
         return value;
-    }
-  }
-
-  private toBoolean(value: unknown): boolean {
-    switch (typeof value) {
-      case 'boolean':
-        return value;
-      case 'number':
-      case 'bigint':
-        return value !== 0;
-      default:
-        if ((value as string).toLowerCase() === 'true') {
-          return true;
-        }
-        return false;
     }
   }
 }
