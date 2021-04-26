@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/MapColonies/discrete-agent/compare/v1.1.0...v1.1.1) (2021-04-26)
+
+
+### Bug Fixes
+
+* config parsing ([#47](https://github.com/MapColonies/discrete-agent/issues/47)) ([9ba2acf](https://github.com/MapColonies/discrete-agent/commit/9ba2acf9bc40f0313802be1cc31aa239b0a02ac2))
+
 ## 1.1.0 (2021-04-18)
 
 
