@@ -36,7 +36,7 @@ export class MetadataMapper {
     sources[ShapeFileType.PRODUCT] = productGeoJson;
     sources[ShapeFileType.SHAPE_METADATA] = metadataGeoJson;
     this.mappings.forEach((map) => {
-      const type = map.mappingType;
+      const type = map.mappingType.value;
       const value = readProp(sources[map.shpFile], map.valuePath) as unknown;
       metadata[map.prop] = this.castValue(value, type);
     });
@@ -49,16 +49,16 @@ export class MetadataMapper {
     metadata.id = parts.join('-');
   }
 
-  private castValue(value: unknown, type: TsTypes): unknown {
+  private castValue(value: unknown, type: string): unknown {
     if (value === undefined) {
       return undefined;
     }
     switch (type) {
-      case TsTypes.BOOLEAN:
+      case TsTypes.BOOLEAN.value:
         return toBoolean(value);
-      case TsTypes.DATE:
+      case TsTypes.DATE.value:
         return new Date(value as string);
-      case TsTypes.NUMBER:
+      case TsTypes.NUMBER.value:
         return toNumber(value);
       default:
         return value;
