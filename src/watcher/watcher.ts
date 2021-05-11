@@ -104,13 +104,14 @@ export class Watcher {
   private async walkDir(path: string, depth = 0): Promise<void> {
     const dir = await promises.opendir(path);
     for await (const dirent of dir) {
+      const itemPath = joinPath(path, dirent.name);
       if (dirent.isDirectory()) {
         if (this.maxWatchDepth > depth) {
-          await this.walkDir(dirent.name, depth++);
+          await this.walkDir(itemPath, depth++);
         }
       } else if (dirent.isFile()) {
         if (this.minTriggerDepth <= depth) {
-          this.triggerFile(dirent.name);
+          this.triggerFile(itemPath);
         }
       }
     }
