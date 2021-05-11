@@ -16,10 +16,12 @@ interface WatchOptions {
 @singleton()
 export class Watcher {
   private watching: boolean;
-  private readonly watchTarget: string;
+  private watchTarget!: string;
   private watcherInterval!: number;
   private minTriggerDepth!: number;
   private maxWatchDepth!: number;
+  //required for testing as fs promises cant be mocked here
+  private readonly opendir: Function;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -28,10 +30,7 @@ export class Watcher {
     private readonly trigger: Trigger,
     private readonly lock: LimitingLock
   ) {
-    const mountDir = config.get<string>('mountDir');
-    const watchDir = config.get<string>('watcher.watchDirectory');
-    this.watchTarget = joinPath(mountDir, watchDir);
-
+    this.opendir = promises.opendir;
     this.watching = false;
     this.loadWatchOptions(config);
 
@@ -68,6 +67,9 @@ export class Watcher {
   }
 
   private loadWatchOptions(config: IConfig): void {
+    const mountDir = config.get<string>('mountDir');
+    const watchDir = config.get<string>('watcher.watchDirectory');
+    this.watchTarget = joinPath(mountDir, watchDir);
     const options = config.get<WatchOptions>('watcher.watchOptions');
     this.minTriggerDepth = toInteger(options.minTriggerDepth);
     this.maxWatchDepth = toInteger(options.maxWatchDepth);
@@ -98,11 +100,11 @@ export class Watcher {
   }
 
   private startIteration(): void {
-    void this.walkDir(this.watchTarget);
+    void this.walkDir(this.watchTarget); //.catch(console.log);
   }
 
   private async walkDir(path: string, depth = 0): Promise<void> {
-    const dir = await promises.opendir(path);
+    const dir = await this.opendir(path);
     for await (const dirent of dir) {
       const itemPath = joinPath(path, dirent.name);
       if (dirent.isDirectory()) {
