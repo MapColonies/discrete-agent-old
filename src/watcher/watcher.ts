@@ -1,21 +1,25 @@
 import { dirname, join as joinPath } from 'path';
 import { promises } from 'fs';
-import { watch, FSWatcher, WatchOptions } from 'chokidar';
 import { inject, singleton } from 'tsyringe';
-import { cloneDeep, toInteger } from 'lodash';
+import { toInteger } from 'lodash';
 import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
 import { AgentDbClient } from '../serviceClients/agentDbClient';
-import { toBoolean } from '../common/utilities/typeConvertors';
 import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
 
+interface WatchOptions {
+  minTriggerDepth: number;
+  maxWatchDepth: number;
+  interval: number;
+}
 @singleton()
 export class Watcher {
-  private readonly watcher: FSWatcher;
   private watching: boolean;
-  private readonly watcherDelay: number;
   private readonly watchTarget: string;
+  private watcherInterval!: number;
+  private minTriggerDepth!: number;
+  private maxWatchDepth!: number;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -27,15 +31,9 @@ export class Watcher {
     const mountDir = config.get<string>('mountDir');
     const watchDir = config.get<string>('watcher.watchDirectory');
     this.watchTarget = joinPath(mountDir, watchDir);
-    const watchOptions = this.getWatchOptions(config);
 
-    this.watcher = watch(this.watchTarget, watchOptions);
-    process.on('beforeExit', () => {
-      void this.watcher.close();
-    });
     this.watching = false;
-    //TODO: read from config
-    this.watcherDelay = 10000;
+    this.loadWatchOptions(config);
 
     void this.dbClient.getWatchStatus().then((data) => {
       this.watching = data.isWatching;
@@ -49,7 +47,6 @@ export class Watcher {
   public async stopWatching(): Promise<void> {
     if (this.watching) {
       this.logger.log('info', 'stopping file watcher');
-      this.watcher.removeAllListeners();
       this.watching = false;
     }
     await this.dbClient.setWatchStatus({
@@ -70,47 +67,20 @@ export class Watcher {
     return this.watching;
   }
 
-  private getWatchOptions(config: IConfig): WatchOptions {
+  private loadWatchOptions(config: IConfig): void {
     const options = config.get<WatchOptions>('watcher.watchOptions');
-    const watchOptions = cloneDeep(options);
-    if (watchOptions.depth != undefined) {
-      watchOptions.depth = toInteger(watchOptions.depth);
-    }
-    if (watchOptions.persistent != undefined) {
-      watchOptions.persistent = toBoolean(watchOptions.persistent);
-    }
-    if (watchOptions.useFsEvents != undefined) {
-      watchOptions.useFsEvents = toBoolean(watchOptions.useFsEvents);
-    }
-    if (watchOptions.usePolling != undefined) {
-      watchOptions.usePolling = toBoolean(watchOptions.usePolling);
-    }
-    if (watchOptions.interval != undefined) {
-      watchOptions.interval = toInteger(watchOptions.interval);
-    }
-    if (watchOptions.awaitWriteFinish != undefined) {
-      if (typeof watchOptions.awaitWriteFinish === 'object') {
-        if (watchOptions.awaitWriteFinish.stabilityThreshold != undefined) {
-          watchOptions.awaitWriteFinish.stabilityThreshold = toInteger(watchOptions.awaitWriteFinish.stabilityThreshold);
-        }
-        if (watchOptions.awaitWriteFinish.pollInterval != undefined) {
-          watchOptions.awaitWriteFinish.pollInterval = toInteger(watchOptions.awaitWriteFinish.pollInterval);
-        }
-      } else {
-        watchOptions.awaitWriteFinish = toBoolean(watchOptions.awaitWriteFinish);
-      }
-    }
-
-    return watchOptions;
+    this.minTriggerDepth = toInteger(options.minTriggerDepth);
+    this.maxWatchDepth = toInteger(options.maxWatchDepth);
+    this.watcherInterval = toInteger(options.interval);
   }
 
   private internalStartWatch(): void {
     this.logger.log('info', 'starting file watcher');
-    this.watcher.on('add', this.onAdd.bind(this));
     this.watching = true;
+    setTimeout(this.startIteration.bind(this), this.watcherInterval);
   }
 
-  private onAdd(path: string): void {
+  private triggerFile(path: string): void {
     const dir = dirname(path);
     const action = async (done: AsyncLockDoneCallback<void>): Promise<void> => {
       try {
@@ -135,14 +105,17 @@ export class Watcher {
     const dir = await promises.opendir(path);
     for await (const dirent of dir) {
       if (dirent.isDirectory()) {
-        //TODO: add limit on depth
-        await this.walkDir(dirent.name);
+        if (this.maxWatchDepth > depth) {
+          await this.walkDir(dirent.name, depth++);
+        }
       } else if (dirent.isFile()) {
-        this.onAdd(dirent.name);
+        if (this.minTriggerDepth <= depth) {
+          this.triggerFile(dirent.name);
+        }
       }
     }
     if (depth === 0 && this.isWatching()) {
-      setTimeout(this.startIteration.bind(this), this.watcherDelay);
+      setTimeout(this.startIteration.bind(this), this.watcherInterval);
     }
   }
 }

@@ -13,17 +13,11 @@
   },
   "mountDir": "/layerSources",
   "watcher": {
-    "watchDirectory": "watch/**/*",
+    "watchDirectory": "watch",
     "watchOptions": {
-      "depth": 2,
-      "persistent": true,
-      "useFsEvents": false,
-      "usePolling": true,
-      "interval": 1000,
-      "awaitWriteFinish": {
-        "stabilityThreshold": 2000,
-        "pollInterval": 100
-      }
+      "minTriggerDepth": 1,
+      "maxWatchDepth": 2,
+      "interval": 1000
     },
     "shpRetry": {
       "retries": 2,
