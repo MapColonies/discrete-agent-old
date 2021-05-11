@@ -1,4 +1,5 @@
 import { dirname, join as joinPath } from 'path';
+import { promises } from 'fs';
 import { watch, FSWatcher, WatchOptions } from 'chokidar';
 import { inject, singleton } from 'tsyringe';
 import { cloneDeep, toInteger } from 'lodash';
@@ -13,6 +14,8 @@ import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
 export class Watcher {
   private readonly watcher: FSWatcher;
   private watching: boolean;
+  private readonly watcherDelay: number;
+  private readonly watchTarget: string;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -23,14 +26,17 @@ export class Watcher {
   ) {
     const mountDir = config.get<string>('mountDir');
     const watchDir = config.get<string>('watcher.watchDirectory');
-    const watchTarget = joinPath(mountDir, watchDir);
+    this.watchTarget = joinPath(mountDir, watchDir);
     const watchOptions = this.getWatchOptions(config);
 
-    this.watcher = watch(watchTarget, watchOptions);
+    this.watcher = watch(this.watchTarget, watchOptions);
     process.on('beforeExit', () => {
       void this.watcher.close();
     });
     this.watching = false;
+    //TODO: read from config
+    this.watcherDelay = 10000;
+
     void this.dbClient.getWatchStatus().then((data) => {
       this.watching = data.isWatching;
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -119,5 +125,24 @@ export class Watcher {
     };
     this.logger.log('debug', `watch triggered for ${path}`);
     void this.lock.acquire(dir, action);
+  }
+
+  private startIteration(): void {
+    void this.walkDir(this.watchTarget);
+  }
+
+  private async walkDir(path: string, depth = 0): Promise<void> {
+    const dir = await promises.opendir(path);
+    for await (const dirent of dir) {
+      if (dirent.isDirectory()) {
+        //TODO: add limit on depth
+        await this.walkDir(dirent.name);
+      } else if (dirent.isFile()) {
+        this.onAdd(dirent.name);
+      }
+    }
+    if (depth === 0 && this.isWatching()) {
+      setTimeout(this.startIteration.bind(this), this.watcherDelay);
+    }
   }
 }
