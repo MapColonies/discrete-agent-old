@@ -112,7 +112,7 @@ export class Watcher {
       const itemPath = joinPath(path, dirent.name);
       if (dirent.isDirectory()) {
         if (this.maxWatchDepth > depth) {
-          await this.walkDir(itemPath, depth++);
+          await this.walkDir(itemPath, ++depth);
         }
       } else if (dirent.isFile()) {
         if (this.minTriggerDepth <= depth) {

@@ -8,10 +8,8 @@ let fs: FsItem;
 // eslint-disable-next-line @typescript-eslint/ban-types
 function init(rawFs: object): void {
   fs = FsItem.generateFsFromObject(rawFs);
-  console.log(fs);
   opendirMock.mockImplementation((path) => {
     const item = getFsItem(fs, path);
-    console.log(item);
     // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
     if (item !== undefined && item.isDirectory()) {
       const entries = Object.values(item.content as Record<string, FsItem>);

@@ -3,8 +3,9 @@ import { Watcher } from '../../../src/watcher/watcher';
 import { configMock, getMock } from '../../mocks/config';
 import { agentDbClientMock, setWatchStatusMock, init as initDb } from '../../mocks/clients/agentDbClient';
 import { triggerMock, triggerFunctionMock } from '../../mocks/trigger';
-import { lockMock } from '../../mocks/limitingLock';
+import { lockMock, acquireMock } from '../../mocks/limitingLock';
 import { opendirMock, init as initFsMock } from '../../mocks/fs/opendir';
+import { AsyncLockDoneCallback } from '../../../src/watcher/limitingLock';
 
 let configData: { [key: string]: unknown } = {};
 let watcher: Watcher;
@@ -117,6 +118,55 @@ describe('watcher', () => {
       await triggerWalkerOnce(watcher);
 
       expect(opendirMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('should only trigger for files after the min trigger depth', async () => {
+      initFsMock({
+        file1: 'file',
+        unmountedDir: {
+          file2: 'file',
+          watch: {
+            file3: 'file',
+            dir: {
+              file4: 'file',
+            },
+            fakeWatch: {
+              file5: 'file',
+              dir: {
+                file6: 'file',
+              },
+            },
+          },
+        },
+        mountDir: {
+          file7: 'file',
+          unWatched: {
+            file8: 'file',
+            dir: {
+              file9: 'file',
+            },
+          },
+          watch: {
+            file10: 'file',
+            dir: {
+              file11: 'file',
+              subdir: {
+                file12: 'file',
+              },
+            },
+          },
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      acquireMock.mockImplementation(async (dir: string, action: (done: AsyncLockDoneCallback<void>) => Promise<void>) => {
+        await action(jest.fn() as AsyncLockDoneCallback<void>);
+      });
+
+      await triggerWalkerOnce(watcher);
+
+      expect(triggerFunctionMock).toHaveBeenCalledTimes(2);
+      expect(triggerFunctionMock).toHaveBeenCalledWith(joinPath('/mountDir', 'watch', 'dir'));
+      expect(triggerFunctionMock).toHaveBeenCalledWith(joinPath('/mountDir', 'watch', 'dir', 'subdir'));
     });
   });
 });
