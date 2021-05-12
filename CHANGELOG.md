@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/MapColonies/discrete-agent/compare/v1.1.2...v1.1.3) (2021-05-12)
+
+
+### Bug Fixes
+
+* fixed watcher polling iterations ([#50](https://github.com/MapColonies/discrete-agent/issues/50)) ([55010bf](https://github.com/MapColonies/discrete-agent/commit/55010bf86379f50212a0878ff19f929888f6d265))
+
 ### [1.1.2](https://github.com/MapColonies/discrete-agent/compare/v1.1.1...v1.1.2) (2021-05-12)
 
 ### [1.1.1](https://github.com/MapColonies/discrete-agent/compare/v1.1.0...v1.1.1) (2021-04-26)
