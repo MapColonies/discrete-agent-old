@@ -12,15 +12,9 @@
   "watcher": {
     "watchDirectory": "WATCH_DIRECTORY",
     "watchOptions": {
-      "depth": "WATCH_DEPTH",
-      "persistent": "WATCH_PERSISTENT",
-      "useFsEvents": "WATCH_USE_FS_EVENTS",
-      "usePolling": "WATCH_USE_POLLING",
-      "interval": "WATCH_INTERVAL",
-      "awaitWriteFinish": {
-        "stabilityThreshold": "WATCH_AWAIT_WRITE_FINISH_STABILITY_THRESHOLD",
-        "pollInterval": "WATCH_AWAIT_WRITE_FINISH_POLL_INTERVAL"
-      }
+      "minTriggerDepth": "WATCH_MIN_TRIGGER_DEPTH",
+      "maxWatchDepth": "WATCH_MAX_TRIGGER_DEPTH",
+      "interval": "WATCH_INTERVAL"
     },
     "shpRetry": {
       "retries": "WATCHER_SHP_RETRY_COUNT",
