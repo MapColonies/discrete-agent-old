@@ -69,7 +69,20 @@ describe('watcher', () => {
 
   describe('#pooling', () => {
     it('trigger next pooling cycle with configured interval when watching', async function () {
-      initFsMock({});
+      initFsMock({
+        mountDir: {
+          watch: {
+            a: {
+              b: {
+                c: {
+                  d: {},
+                },
+              },
+              file: 'file',
+            },
+          },
+        },
+      });
 
       await watcher.startWatching();
       jest.runOnlyPendingTimers();
