@@ -1,5 +1,5 @@
 import { dirname, join as joinPath } from 'path';
-import { promises } from 'fs';
+import { promises, Dir, OpenDirOptions } from 'fs';
 import { inject, singleton } from 'tsyringe';
 import { toInteger } from 'lodash';
 import { IConfig, ILogger } from '../common/interfaces';
@@ -21,7 +21,7 @@ export class Watcher {
   private minTriggerDepth!: number;
   private maxWatchDepth!: number;
   //required for testing as fs promises cant be mocked here
-  private readonly opendir: Function;
+  private readonly opendir: (path: string, options?: OpenDirOptions | undefined) => Promise<Dir>;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
@@ -100,7 +100,10 @@ export class Watcher {
   }
 
   private startIteration(): void {
-    void this.walkDir(this.watchTarget); //.catch(console.log);
+    void this.walkDir(this.watchTarget).catch((err) => {
+      const error = err as Error;
+      this.logger.log('err', error.message);
+    });
   }
 
   private async walkDir(path: string, depth = 0): Promise<void> {
