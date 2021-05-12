@@ -102,7 +102,7 @@ export class Watcher {
   private startIteration(): void {
     void this.walkDir(this.watchTarget).catch((err) => {
       const error = err as Error;
-      this.logger.log('err', error.message);
+      this.logger.log('error', error.message);
     });
   }
 
@@ -112,7 +112,7 @@ export class Watcher {
       const itemPath = joinPath(path, dirent.name);
       if (dirent.isDirectory()) {
         if (this.maxWatchDepth > depth) {
-          await this.walkDir(itemPath, ++depth);
+          await this.walkDir(itemPath, depth + 1);
         }
       } else if (dirent.isFile()) {
         if (this.minTriggerDepth <= depth) {
