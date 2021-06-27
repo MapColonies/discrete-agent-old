@@ -12,6 +12,7 @@ import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 
 import { configMock, getMock } from '../../../mocks/config';
 import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
+import { fileMapperMock, stripSubDirsMock, getFilePathMock } from '../../../mocks/fileMapper';
 
 const expectedMetadata = loadTestMetadata();
 const expectedParams = loadTestIngestionParams();
@@ -44,6 +45,8 @@ describe('trigger', () => {
   beforeEach(() => {
     configData['mountDir'] = '/mountDir';
     getMock.mockImplementation((key: string) => configData[key]);
+    stripSubDirsMock.mockImplementation((dir: string) => dir);
+    getFilePathMock.mockImplementation((file: string, extension: string) => `${file}.${extension}`);
   });
 
   afterEach(function () {
@@ -72,6 +75,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );
@@ -97,6 +101,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );
@@ -120,6 +125,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );
@@ -152,6 +158,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );
@@ -184,6 +191,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );
@@ -219,6 +227,7 @@ describe('trigger', () => {
         overseerClientMock,
         agentDbClientMock,
         lockMock,
+        fileMapperMock,
         { log: jest.fn() },
         configMock
       );

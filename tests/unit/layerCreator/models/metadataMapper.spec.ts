@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { GeoJSON } from 'geojson';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { MetadataMapper } from '../../../../src/layerCreator/models/metadataMapper';
+import { fileMapperMock } from '../../../mocks/fileMapper';
 
 let filesGeoJson: GeoJSON;
 let productGeoJson: GeoJSON;
@@ -17,7 +18,7 @@ describe('metadataMapper', () => {
   });
 
   beforeEach(() => {
-    metadataMapper = new MetadataMapper();
+    metadataMapper = new MetadataMapper(fileMapperMock);
   });
 
   describe('map', () => {
