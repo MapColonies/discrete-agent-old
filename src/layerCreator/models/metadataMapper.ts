@@ -3,12 +3,13 @@ import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
 import { get as readProp, toNumber } from 'lodash';
 import { toBoolean } from '../../common/utilities/typeConvertors';
+import { FileMapper } from './fileMapper';
 
 @injectable()
 export class MetadataMapper {
   private readonly mappings: IPropSHPMapping[];
 
-  public constructor() {
+  public constructor(private readonly fileMapper: FileMapper) {
     this.mappings = LayerMetadata.getShpMappings();
   }
 
@@ -24,7 +25,7 @@ export class MetadataMapper {
     const files = features.map((feature) => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const file = feature.properties as { 'File Name': string; Format: string };
-      return `${file['File Name']}.${file.Format}`;
+      return this.fileMapper.getFilePath(file['File Name'], file.Format);
     });
     return files;
   }

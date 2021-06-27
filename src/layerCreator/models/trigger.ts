@@ -15,6 +15,7 @@ import { LimitingLock } from '../../watcher/limitingLock';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
+import { FileMapper } from './fileMapper';
 
 @injectable()
 export class Trigger {
@@ -28,6 +29,7 @@ export class Trigger {
     private readonly overseerClient: OverseerClient,
     private readonly agentDbClient: AgentDbClient,
     private readonly lock: LimitingLock,
+    private readonly fileMapper: FileMapper,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     @inject(Services.CONFIG) private readonly config: IConfig
   ) {
@@ -36,6 +38,7 @@ export class Trigger {
   }
 
   public async trigger(directory: string, isManual = false): Promise<void> {
+    directory = this.fileMapper.stripSubDirs(directory);
     const relDir = path.relative(this.mountDir, directory);
     this.logger.log('debug', `mount: ${this.mountDir} , full dir: ${directory} , relative dir: ${relDir}`);
     const status = await this.agentDbClient.getDiscreteStatus(relDir);
@@ -50,12 +53,12 @@ export class Trigger {
       }
     }
     //check if all shp files exists
-    const filesShp = path.join(directory, 'Files.shp');
-    const filesDbf = path.join(directory, 'Files.dbf');
-    const productShp = path.join(directory, 'Product.shp');
-    const productDbf = path.join(directory, 'Product.dbf');
-    const metadataShp = path.join(directory, 'ShapeMetadata.shp');
-    const metadataDbf = path.join(directory, 'ShapeMetadata.dbf');
+    const filesShp = path.join(directory, this.fileMapper.getFilePath('Files', 'shp'));
+    const filesDbf = path.join(directory, this.fileMapper.getFilePath('Files', 'dbf'));
+    const productShp = path.join(directory, this.fileMapper.getFilePath('Product', 'shp'));
+    const productDbf = path.join(directory, this.fileMapper.getFilePath('Product', 'dbf'));
+    const metadataShp = path.join(directory, this.fileMapper.getFilePath('ShapeMetadata', 'shp'));
+    const metadataDbf = path.join(directory, this.fileMapper.getFilePath('ShapeMetadata', 'dbf'));
     if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
       const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, directory);
