@@ -32,13 +32,14 @@
   },
   "config": {
     "commitizen": {
+      "pre-commit": "pretty-quick --staged",
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^4.0.0",
+    "@map-colonies/mc-model-types": "^7.1.0",
     "@map-colonies/mc-probe": "^1.0.0",
     "@types/async-lock": "^1.1.2",
     "async-lock": "^1.2.8",
@@ -60,6 +61,7 @@
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^10.0.0",
     "@map-colonies/eslint-config": "^2.2.0",
+    "@map-colonies/standard-version-update-openapi3-version": "^0.0.2",
     "@redocly/openapi-cli": "^1.0.0-beta.25",
     "@types/async-retry": "^1.4.2",
     "@types/config": "0.0.36",
@@ -85,6 +87,7 @@
     "jest-mock-axios": "^4.3.0",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.1",
     "rimraf": "^3.0.2",
     "standard-version": "^9.0.0",
     "supertest": "^6.0.1",

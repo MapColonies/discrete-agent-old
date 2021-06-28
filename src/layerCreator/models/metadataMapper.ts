@@ -14,9 +14,9 @@ export class MetadataMapper {
   }
 
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): LayerMetadata {
-    const metadata: LayerMetadata = {};
+    const metadata = ({} as unknown) as LayerMetadata;
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson);
-    this.parseIdentifiers(metadata);
+    this.parseIdentifiers(metadata, metadataGeoJson);
     return metadata;
   }
 
@@ -31,7 +31,7 @@ export class MetadataMapper {
   }
 
   private autoMapModels(baseMetadata: LayerMetadata, productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): void {
-    const metadata = baseMetadata as Record<string, unknown>;
+    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
     const sources = {} as { [key: string]: GeoJSON };
     sources[ShapeFileType.FILES] = filesGeoJson;
     sources[ShapeFileType.PRODUCT] = productGeoJson;
@@ -43,11 +43,11 @@ export class MetadataMapper {
     });
   }
 
-  private parseIdentifiers(metadata: LayerMetadata): void {
-    const source = metadata.source as string;
+  private parseIdentifiers(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const source = readProp(metadataGeoJson, 'features[0].properties.Source') as string;
     const parts = source.split('-');
-    metadata.version = parts.pop();
-    metadata.id = parts.join('-');
+    metadata.productId = parts[0];
+    metadata.productVersion = parts[1];
   }
 
   private castValue(value: unknown, type: string): unknown {

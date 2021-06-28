@@ -19,8 +19,8 @@ const expectedParams = loadTestIngestionParams();
 const baseHistoryStatus = {
   directory: 'test',
   status: HistoryStatus.IN_PROGRESS,
-  id: expectedMetadata.id,
-  version: expectedMetadata.version,
+  id: expectedMetadata.productId,
+  version: expectedMetadata.productVersion,
 };
 const fileList = [
   'X1825_Y1649.Tiff',
@@ -88,7 +88,12 @@ describe('trigger', () => {
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedParams);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(1);
-      expect(updateDiscreteStatusMock).toHaveBeenCalledWith('test', HistoryStatus.TRIGGERED, expectedMetadata.id, expectedMetadata.version);
+      expect(updateDiscreteStatusMock).toHaveBeenCalledWith(
+        'test',
+        HistoryStatus.TRIGGERED,
+        expectedMetadata.productId,
+        expectedMetadata.productVersion
+      );
     });
 
     it('auto trigger will skip already triggered directory', async function () {

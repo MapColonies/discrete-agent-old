@@ -86,9 +86,19 @@ export class Trigger {
       };
       try {
         await this.overseerClient.ingestDiscreteLayer(ingestionData);
-        await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.TRIGGERED, ingestionData.metadata.id, ingestionData.metadata.version);
+        await this.agentDbClient.updateDiscreteStatus(
+          relDir,
+          HistoryStatus.TRIGGERED,
+          ingestionData.metadata.productId,
+          ingestionData.metadata.productVersion
+        );
       } catch (err) {
-        await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED, ingestionData.metadata.id, ingestionData.metadata.version);
+        await this.agentDbClient.updateDiscreteStatus(
+          relDir,
+          HistoryStatus.FAILED,
+          ingestionData.metadata.productId,
+          ingestionData.metadata.productVersion
+        );
         if (isManual) {
           throw err;
         }
