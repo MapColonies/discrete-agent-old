@@ -17,16 +17,19 @@ export class OverseerClient extends HttpClient {
   }
 
   public async ingestDiscreteLayer(ingestionData: IngestionParams): Promise<LayerMetadata> {
-    this.logger.log('info', `Trigger overseer for id: ${ingestionData.metadata.id as string} version: ${ingestionData.metadata.version as string}`);
+    this.logger.log(
+      'info',
+      `Trigger overseer for id: ${ingestionData.metadata.productId as string} version: ${ingestionData.metadata.productVersion as string}`
+    );
     try {
       return await this.post('/layers', ingestionData);
     } catch (err) {
       const error = err as Error;
       this.logger.log(
         'error',
-        `failed to trigger overseer for for id=${ingestionData.metadata.id as string} version=${ingestionData.metadata.version as string}, error=${
-          error.message
-        }`
+        `failed to trigger overseer for for id=${ingestionData.metadata.productId as string} version=${
+          ingestionData.metadata.productVersion as string
+        }, error=${error.message}`
       );
       throw err;
     }
