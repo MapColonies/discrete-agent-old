@@ -40,12 +40,17 @@ export class FilesManager {
     return true;
   }
 
-  private async fileExists(path: string): Promise<boolean> {
+  public async fileExists(path: string): Promise<boolean> {
     return fsPromise
       .access(path, fsConstants.F_OK)
       .then(() => true)
       .catch(() => {
         return false;
       });
+  }
+
+  public async readAllLines(path: string): Promise<string[]> {
+    const content = await fsPromise.readFile(path, { encoding: 'utf8' });
+    return content.split(/\r?\n/);
   }
 }

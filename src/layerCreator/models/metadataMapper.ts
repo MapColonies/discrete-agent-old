@@ -1,4 +1,4 @@
-import { IPropSHPMapping, LayerMetadata, ShapeFileType, TsTypes } from '@map-colonies/mc-model-types';
+import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes, SensorType } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
 import { get as readProp, toNumber } from 'lodash';
@@ -13,10 +13,13 @@ export class MetadataMapper {
     this.mappings = LayerMetadata.getShpMappings();
   }
 
-  public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): LayerMetadata {
-    const metadata: LayerMetadata = {};
-    this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson);
-    this.parseIdentifiers(metadata);
+  public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
+    const metadata = ({} as unknown) as LayerMetadata;
+    this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
+    this.parseIdentifiers(metadata, metadataGeoJson);
+    this.parseSourceDates(metadata, metadataGeoJson);
+    this.parseSensorTypes(metadata, metadataGeoJson);
+    this.parseLayerPolygonParts(metadata, metadataGeoJson);
     return metadata;
   }
 
@@ -30,24 +33,65 @@ export class MetadataMapper {
     return files;
   }
 
-  private autoMapModels(baseMetadata: LayerMetadata, productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON): void {
-    const metadata = baseMetadata as Record<string, unknown>;
-    const sources = {} as { [key: string]: GeoJSON };
-    sources[ShapeFileType.FILES] = filesGeoJson;
-    sources[ShapeFileType.PRODUCT] = productGeoJson;
-    sources[ShapeFileType.SHAPE_METADATA] = metadataGeoJson;
+  private autoMapModels(
+    baseMetadata: LayerMetadata,
+    productGeoJson: GeoJSON,
+    metadataGeoJson: GeoJSON,
+    filesGeoJson: GeoJSON,
+    tfwFile: string[]
+  ): void {
+    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
+    const sources = {} as { [key: string]: unknown };
+    sources[DataFileType.FILES] = filesGeoJson;
+    sources[DataFileType.PRODUCT] = productGeoJson;
+    sources[DataFileType.SHAPE_METADATA] = metadataGeoJson;
+    sources[DataFileType.TFW] = tfwFile;
     this.mappings.forEach((map) => {
       const type = map.mappingType.value;
-      const value = readProp(sources[map.shpFile], map.valuePath) as unknown;
+      const value = readProp(sources[map.dataFile], map.valuePath) as unknown;
       metadata[map.prop] = this.castValue(value, type);
     });
   }
 
-  private parseIdentifiers(metadata: LayerMetadata): void {
-    const source = metadata.source as string;
+  private parseIdentifiers(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const source = readProp(metadataGeoJson, 'features[0].properties.Source') as string;
     const parts = source.split('-');
-    metadata.version = parts.pop();
-    metadata.id = parts.join('-');
+    metadata.productId = parts[0];
+    metadata.productVersion = parts[1];
+  }
+
+  private parseSourceDates(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const features = (metadataGeoJson as FeatureCollection).features;
+    const dates = features.map((feature) => {
+      const dateStr = readProp(feature, 'properties.UpdateDate') as string;
+      return this.castValue(dateStr, TsTypes.DATE.value) as Date;
+    });
+    let maxDate = dates[0];
+    let minDate = dates[0];
+    for (let i = 1; i < dates.length; i++) {
+      if (dates[i] > maxDate) {
+        maxDate = dates[i];
+      } else if (dates[i] < minDate) {
+        minDate = dates[i];
+      }
+    }
+    metadata.sourceDateStart = minDate;
+    metadata.sourceDateEnd = maxDate;
+    metadata.updateDate = maxDate;
+  }
+
+  private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const features = (metadataGeoJson as FeatureCollection).features;
+    const types = new Set<SensorType>();
+    features.forEach((feature) => {
+      const sensor = readProp(feature, 'properties.SensorType') as SensorType;
+      types.add(sensor);
+    });
+    metadata.sensorType = Array.from(types);
+  }
+
+  private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    metadata.layerPolygonParts = metadataGeoJson;
   }
 
   private castValue(value: unknown, type: string): unknown {
@@ -58,7 +102,7 @@ export class MetadataMapper {
       case TsTypes.BOOLEAN.value:
         return toBoolean(value);
       case TsTypes.DATE.value:
-        return new Date(value as string);
+        return new Date((value as string) + 'z');
       case TsTypes.NUMBER.value:
         return toNumber(value);
       default:

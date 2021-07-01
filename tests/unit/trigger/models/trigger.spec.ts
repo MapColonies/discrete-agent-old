@@ -3,24 +3,30 @@ import { resolve } from 'path';
 import axiosMock from 'jest-mock-axios';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Trigger } from '../../../../src/layerCreator/models/trigger';
+import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
 import { overseerClientMock, ingestDiscreteLayerMock } from '../../../mocks/clients/overseerClient';
 import { agentDbClientMock, updateDiscreteStatusMock, getDiscreteStatusMock } from '../../../mocks/clients/agentDbClient';
-import { validateLayerFilesExistsMock, validateShpFilesExistsMock, filesManagerMock } from '../../../mocks/filesManager';
+import {
+  validateLayerFilesExistsMock,
+  validateShpFilesExistsMock,
+  filesManagerMock,
+  fileExistsMock,
+  readAllLinesMock,
+} from '../../../mocks/filesManager';
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
-
 import { configMock, getMock } from '../../../mocks/config';
-import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
 import { fileMapperMock, stripSubDirsMock, getFilePathMock } from '../../../mocks/fileMapper';
+import { tfw } from '../../../mockData/tfw';
 
 const expectedMetadata = loadTestMetadata();
 const expectedParams = loadTestIngestionParams();
 const baseHistoryStatus = {
   directory: 'test',
   status: HistoryStatus.IN_PROGRESS,
-  id: expectedMetadata.id,
-  version: expectedMetadata.version,
+  id: expectedMetadata.productId,
+  version: expectedMetadata.productVersion,
 };
 const fileList = [
   'X1825_Y1649.Tiff',
@@ -47,6 +53,7 @@ describe('trigger', () => {
     getMock.mockImplementation((key: string) => configData[key]);
     stripSubDirsMock.mockImplementation((dir: string) => dir);
     getFilePathMock.mockImplementation((file: string, extension: string) => `${file}.${extension}`);
+    readAllLinesMock.mockResolvedValue(tfw);
   });
 
   afterEach(function () {
@@ -67,6 +74,7 @@ describe('trigger', () => {
       validateShpFilesExistsMock.mockResolvedValue(true);
       parseFilesShpJsonMock.mockReturnValue(fileList);
       mapMock.mockReturnValue(expectedMetadata);
+      fileExistsMock.mockResolvedValue(true);
 
       const trigger = new Trigger(
         shpParserMock,
@@ -88,7 +96,12 @@ describe('trigger', () => {
       expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(1);
       expect(ingestDiscreteLayerMock).toHaveBeenCalledWith(expectedParams);
       expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(1);
-      expect(updateDiscreteStatusMock).toHaveBeenCalledWith('test', HistoryStatus.TRIGGERED, expectedMetadata.id, expectedMetadata.version);
+      expect(updateDiscreteStatusMock).toHaveBeenCalledWith(
+        'test',
+        HistoryStatus.TRIGGERED,
+        expectedMetadata.productId,
+        expectedMetadata.productVersion
+      );
     });
 
     it('auto trigger will skip already triggered directory', async function () {
@@ -150,6 +163,7 @@ describe('trigger', () => {
       parseMock.mockResolvedValue({});
       parseFilesShpJsonMock.mockReturnValue(['file.tiff']);
       mapMock.mockReturnValue(expectedMetadata);
+      fileExistsMock.mockResolvedValue(true);
 
       const trigger = new Trigger(
         shpParserMock,
@@ -183,6 +197,7 @@ describe('trigger', () => {
       parseMock.mockResolvedValue({});
       parseFilesShpJsonMock.mockReturnValue(['file.tiff']);
       mapMock.mockReturnValue(expectedMetadata);
+      fileExistsMock.mockResolvedValue(true);
 
       const trigger = new Trigger(
         shpParserMock,

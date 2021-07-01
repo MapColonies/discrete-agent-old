@@ -3,9 +3,10 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import axiosMock from 'jest-mock-axios';
 import { registerTestValues } from '../testContainerConfig';
-import { validateLayerFilesExistsMock, validateShpFilesExistsMock } from '../../mocks/filesManager';
+import { validateLayerFilesExistsMock, validateShpFilesExistsMock, fileExistsMock, readAllLinesMock } from '../../mocks/filesManager';
 import { initShapeFileMock } from '../../mocks/shapeFile';
 import { registerDefaultConfig } from '../../mocks/config';
+import { tfw } from '../../mockData/tfw';
 import * as requestSender from './helpers/requestSender';
 
 describe('manualTrigger', function () {
@@ -19,19 +20,17 @@ describe('manualTrigger', function () {
     joinPath(layerRootDir, 'Shapes', 'ShapeMetadata.dbf'),
   ];
   const expectedTiffs = [
-    normalize('tiff/X1825_Y1649.tif'),
-    normalize('tiff/X1825_Y1650.tif'),
-    normalize('tiff/X1825_Y1651.tif'),
-    normalize('tiff/X1826_Y1649.tif'),
-    normalize('tiff/X1826_Y1650.tif'),
-    normalize('tiff/X1826_Y1651.tif'),
-    normalize('tiff/X1827_Y1649.tif'),
-    normalize('tiff/X1827_Y1650.tif'),
-    normalize('tiff/X1827_Y1651.tif'),
-    normalize('tiff/X1828_Y1649.tif'),
-    normalize('tiff/X1828_Y1650.tif'),
-    normalize('tiff/X1828_Y1651.tif'),
+    normalize('tiff/X1881_Y1730.tif'),
+    normalize('tiff/X1881_Y1731.tif'),
+    normalize('tiff/X1881_Y1732.tif'),
+    normalize('tiff/X1882_Y1730.tif'),
+    normalize('tiff/X1882_Y1731.tif'),
+    normalize('tiff/X1882_Y1732.tif'),
+    normalize('tiff/X1883_Y1730.tif'),
+    normalize('tiff/X1883_Y1731.tif'),
+    normalize('tiff/X1883_Y1732.tif'),
   ];
+  const expectedTfw = joinPath(layerRootDir, 'tiff', 'X1881_Y1730.tfw');
 
   beforeAll(function () {
     container.clearInstances();
@@ -52,6 +51,8 @@ describe('manualTrigger', function () {
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
+      fileExistsMock.mockResolvedValue(true);
+      readAllLinesMock.mockResolvedValue(tfw);
       const validRequest = {
         sourceDirectory: 'testDir',
       };
@@ -61,12 +62,16 @@ describe('manualTrigger', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
       expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
+      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
+      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
 
     it('should return 200 status code when triggered on layer Shapes dir', async function () {
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
+      fileExistsMock.mockResolvedValue(true);
+      readAllLinesMock.mockResolvedValue(tfw);
       const validRequest = {
         sourceDirectory: 'testDir/Shapes',
       };
@@ -76,12 +81,16 @@ describe('manualTrigger', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
       expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
+      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
+      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
 
     it('should return 200 status code when triggered on layer tiff dir', async function () {
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
+      fileExistsMock.mockResolvedValue(true);
+      readAllLinesMock.mockResolvedValue(tfw);
       const validRequest = {
         sourceDirectory: 'testDir/tiff',
       };
@@ -91,6 +100,8 @@ describe('manualTrigger', function () {
       expect(response.status).toBe(httpStatusCodes.OK);
       expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
       expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
+      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
+      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
   });
 
@@ -123,6 +134,20 @@ describe('manualTrigger', function () {
       validateLayerFilesExistsMock.mockResolvedValue(true);
       validateShpFilesExistsMock.mockResolvedValue(false);
       axiosMock.post.mockResolvedValue({});
+      const validRequest = {
+        sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 when first tfw file are missing', async () => {
+      validateLayerFilesExistsMock.mockResolvedValue(true);
+      validateShpFilesExistsMock.mockResolvedValue(true);
+      axiosMock.post.mockResolvedValue({});
+      fileExistsMock.mockResolvedValue(false);
       const validRequest = {
         sourceDirectory: 'testDir',
       };
