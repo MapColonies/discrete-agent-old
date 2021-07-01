@@ -39,7 +39,7 @@
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^7.1.0",
+    "@map-colonies/mc-model-types": "^7.3.0",
     "@map-colonies/mc-probe": "^1.0.0",
     "@types/async-lock": "^1.1.2",
     "async-lock": "^1.3.0",

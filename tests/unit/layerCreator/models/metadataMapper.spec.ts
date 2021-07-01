@@ -4,6 +4,7 @@ import { GeoJSON } from 'geojson';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { MetadataMapper } from '../../../../src/layerCreator/models/metadataMapper';
 import { fileMapperMock } from '../../../mocks/fileMapper';
+import { tfw } from '../../../mockData/tfw';
 
 let filesGeoJson: GeoJSON;
 let productGeoJson: GeoJSON;
@@ -24,7 +25,7 @@ describe('metadataMapper', () => {
   describe('map', () => {
     it('metadata is map according to model', () => {
       // action
-      const metadata = metadataMapper.map(productGeoJson, metadataGeoJson, filesGeoJson);
+      const metadata = metadataMapper.map(productGeoJson, metadataGeoJson, filesGeoJson, tfw);
 
       // expectation
       expect(metadata).toEqual(expectedMetadata);
@@ -48,4 +49,6 @@ function loadTestData() {
   metadataGeoJson = (JSON.parse(geoJsonMetadataStr) as unknown) as GeoJSON;
   expectedMetadata = (JSON.parse(layerMetadataStr) as unknown) as LayerMetadata;
   expectedMetadata.updateDate = new Date((expectedMetadata.updateDate as unknown) as string);
+  expectedMetadata.sourceDateStart = new Date((expectedMetadata.sourceDateStart as unknown) as string);
+  expectedMetadata.sourceDateEnd = new Date((expectedMetadata.sourceDateEnd as unknown) as string);
 }

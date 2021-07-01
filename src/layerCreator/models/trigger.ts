@@ -2,7 +2,7 @@ import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
 import retry from 'async-retry';
-import { toInteger } from 'lodash';
+import { toInteger, get as readProp } from 'lodash';
 import { IngestionParams } from '@map-colonies/mc-model-types';
 import { Services } from '../../common/constants';
 import { ILogger, IConfig } from '../../common/interfaces';
@@ -73,15 +73,25 @@ export class Trigger {
         }
         return;
       }
-      // parse all shp files and convert to model
+      const tfwFileName = readProp(filesGeoJson, "features[0].properties['File Name']") as string;
+      const tfwFilePath = path.join(directory, this.fileMapper.getFilePath(tfwFileName, 'tfw'));
+      if (!(await this.fileManager.fileExists(tfwFilePath))) {
+        if (isManual) {
+          await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);
+          throw new BadRequestError(`${tfwFilePath} is missing`);
+        }
+        return;
+      }
+      // parse all data files and convert to model
       const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual, directory);
       const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual, directory);
       if (!productGeoJson || !metaDataGeoJson) {
         return;
       }
+      const tfwFile = await this.fileManager.readAllLines(tfwFilePath);
       const ingestionData: IngestionParams = {
         fileNames: this.metadataMapper.parseFilesShpJson(filesGeoJson),
-        metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson),
+        metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson, tfwFile),
         originDirectory: relDir,
       };
       try {

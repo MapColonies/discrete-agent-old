@@ -24,6 +24,10 @@ export class FileMapper {
       fileExtension: 'tif',
       pathPrefix: 'tiff',
     },
+    tfw: {
+      fileExtension: 'tfw',
+      pathPrefix: 'tiff',
+    },
   };
   private stripSubDirsRegex!: RegExp;
 
