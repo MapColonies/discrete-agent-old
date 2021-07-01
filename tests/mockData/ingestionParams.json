@@ -15,7 +15,7 @@
     "X1828_Y1651.Tiff"
   ],
   "metadata": {
-    "updateDate": "2019-06-03T21:00:00.000Z",
+    "updateDate": "2019-06-04T00:00:00.000Z",
     "resolution": 0.0000018519,
     "accuracyCE90": 1,
     "sensorType": [
@@ -55,8 +55,8 @@
     "productId": "LAYER",
     "productName": "product",
     "productType": "Orthophoto",
-    "sourceDateEnd": "2019-06-03T21:00:00.000Z",
-    "sourceDateStart": "2019-06-03T21:00:00.000Z",
+    "sourceDateEnd": "2019-06-04T00:00:00.000Z",
+    "sourceDateStart": "2019-06-04T00:00:00.000Z",
     "layerPolygonParts": {
       "type": "FeatureCollection",
       "features": [

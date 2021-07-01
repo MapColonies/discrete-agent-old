@@ -64,7 +64,7 @@ export class MetadataMapper {
     const features = (metadataGeoJson as FeatureCollection).features;
     const dates = features.map((feature) => {
       const dateStr = readProp(feature, 'properties.UpdateDate') as string;
-      return new Date(dateStr);
+      return this.castValue(dateStr, TsTypes.DATE.value) as Date;
     });
     let maxDate = dates[0];
     let minDate = dates[0];
