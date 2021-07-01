@@ -102,7 +102,7 @@ export class MetadataMapper {
       case TsTypes.BOOLEAN.value:
         return toBoolean(value);
       case TsTypes.DATE.value:
-        return new Date(value as string);
+        return new Date((value as string) + 'z');
       case TsTypes.NUMBER.value:
         return toNumber(value);
       default:
