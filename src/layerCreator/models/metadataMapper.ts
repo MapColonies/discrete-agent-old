@@ -14,7 +14,7 @@ export class MetadataMapper {
   }
 
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
-    const metadata = ({} as unknown) as LayerMetadata;
+    const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
     this.parseIdentifiers(metadata, metadataGeoJson);
     this.parseSourceDates(metadata, metadataGeoJson);
@@ -95,7 +95,7 @@ export class MetadataMapper {
   }
 
   private castValue(value: unknown, type: string): unknown {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
       return undefined;
     }
     switch (type) {
