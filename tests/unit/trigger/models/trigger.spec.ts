@@ -1,5 +1,3 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import axiosMock from 'jest-mock-axios';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { Trigger } from '../../../../src/layerCreator/models/trigger';
@@ -19,6 +17,8 @@ import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 import { configMock, getMock } from '../../../mocks/config';
 import { fileMapperMock, stripSubDirsMock, getFilePathMock } from '../../../mocks/fileMapper';
 import { tfw } from '../../../mockData/tfw';
+import { metadata } from '../../../mockData/layerMetadata';
+import { ingestionParams } from '../../../mockData/ingestionParams';
 
 const expectedMetadata = loadTestMetadata();
 const expectedParams = loadTestIngestionParams();
@@ -260,16 +260,9 @@ describe('trigger', () => {
 });
 
 function loadTestMetadata(): LayerMetadata {
-  const layerMetadataPath = resolve(__dirname, '../../../mockData/layerMetadata.json');
-  return loadJson(layerMetadataPath) as LayerMetadata;
+  return ({ ...metadata } as unknown) as LayerMetadata;
 }
 
 function loadTestIngestionParams(): LayerMetadata {
-  const layerMetadataPath = resolve(__dirname, '../../../mockData/ingestionParams.json');
-  return loadJson(layerMetadataPath) as LayerMetadata;
-}
-
-function loadJson(path: string): unknown {
-  const content = readFileSync(path, { encoding: 'utf8' });
-  return JSON.parse(content) as unknown;
+  return ({ ...ingestionParams } as unknown) as LayerMetadata;
 }

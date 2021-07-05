@@ -1,7 +1,7 @@
 import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes, SensorType } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON } from 'geojson';
-import { get as readProp, toNumber } from 'lodash';
+import { get as readProp, toNumber, isNil } from 'lodash';
 import { toBoolean } from '../../common/utilities/typeConvertors';
 import { FileMapper } from './fileMapper';
 
@@ -95,7 +95,7 @@ export class MetadataMapper {
   }
 
   private castValue(value: unknown, type: string): unknown {
-    if (value === undefined || value === null) {
+    if (isNil(value)) {
       return undefined;
     }
     switch (type) {
