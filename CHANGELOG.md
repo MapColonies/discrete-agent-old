@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/MapColonies/discrete-agent/compare/v1.1.3...v1.2.0) (2021-07-06)
+
+
+### Features
+
+* added support for new folder structure ([#53](https://github.com/MapColonies/discrete-agent/issues/53)) ([49ab366](https://github.com/MapColonies/discrete-agent/commit/49ab366caca6ac57a7fc00e582224db54f510d4a))
+* updated agent to use new models ([#54](https://github.com/MapColonies/discrete-agent/issues/54)) ([42708bd](https://github.com/MapColonies/discrete-agent/commit/42708bdd8287d55749600cc4bcccab8dd94b353d))
+
+
+### Bug Fixes
+
+* fixed constns and null mappings ([#58](https://github.com/MapColonies/discrete-agent/issues/58)) ([0274ad1](https://github.com/MapColonies/discrete-agent/commit/0274ad12ebc03d19ac3519a09b80d2332a093004))
+
 ### [1.1.3](https://github.com/MapColonies/discrete-agent/compare/v1.1.2...v1.1.3) (2021-05-12)
 
 

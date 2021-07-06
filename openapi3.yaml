@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: discrete-agent
   description: basic template for map colonies service
-  version: 1.0.0
+  version: 1.2.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -20,9 +20,9 @@ paths:
             schema:
               $ref: '#/components/schemas/createLayerRequest'
       responses:
-        200:
+        '200':
           description: OK
-        400:
+        '400':
           description: Bad Request
           content:
             application/json:
@@ -35,7 +35,7 @@ paths:
         - WatchStatus
       summary: returns the watching status of the agent.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -48,7 +48,7 @@ paths:
         - WatchStatus
       summary: starts the agent file watcher.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -61,7 +61,7 @@ paths:
         - WatchStatus
       summary: stops the agent file watcher.
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
