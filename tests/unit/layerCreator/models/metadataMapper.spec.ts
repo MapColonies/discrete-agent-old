@@ -4,6 +4,7 @@ import { GeoJSON } from 'geojson';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { MetadataMapper } from '../../../../src/layerCreator/models/metadataMapper';
 import { fileMapperMock } from '../../../mocks/fileMapper';
+import { classifierMock, getClassificationMock } from '../../../mocks/classifier';
 import { tfw } from '../../../mockData/tfw';
 import { metadata as testExpectedMetadata } from '../../../mockData/layerMetadata';
 
@@ -20,7 +21,8 @@ describe('metadataMapper', () => {
   });
 
   beforeEach(() => {
-    metadataMapper = new MetadataMapper(fileMapperMock);
+    getClassificationMock.mockReturnValue(4);
+    metadataMapper = new MetadataMapper(fileMapperMock, classifierMock);
   });
 
   describe('map', () => {

@@ -1,4 +1,4 @@
-import { promises as fsPromise, constants as fsConstants } from 'fs';
+import { promises as fsPromise, constants as fsConstants, readFileSync } from 'fs';
 import * as path from 'path';
 import { singleton } from 'tsyringe';
 
@@ -50,7 +50,15 @@ export class FilesManager {
   }
 
   public async readAllLines(path: string): Promise<string[]> {
-    const content = await fsPromise.readFile(path, { encoding: 'utf8' });
+    const content = await this.readAsString(path);
     return content.split(/\r?\n/);
+  }
+
+  public async readAsString(path: string): Promise<string> {
+    return fsPromise.readFile(path, { encoding: 'utf8' });
+  }
+
+  public readAsStringSync(path: string): string {
+    return readFileSync(path, { encoding: 'utf8' });
   }
 }

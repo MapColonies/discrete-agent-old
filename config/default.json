@@ -38,5 +38,6 @@
     "attempts": 5,
     "delay": "exponential",
     "shouldResetTimeout": true
-  }
+  },
+  "classificationOptionsFile": "config/classification.json"
 }

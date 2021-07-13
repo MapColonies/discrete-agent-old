@@ -9,7 +9,7 @@ export const metadata = {
   scale: undefined,
   producerName: undefined,
   region: undefined,
-  classification: undefined,
+  classification: '4',
   creationDate: undefined,
   ingestionDate: undefined,
   srsId: undefined,
