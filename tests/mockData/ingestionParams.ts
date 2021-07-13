@@ -20,7 +20,7 @@ export const ingestionParams = {
     updateDate: '2019-06-04T00:00:00.000Z',
     resolution: 0.0000018519,
     accuracyCE90: 1,
-    classification: undefined,
+    classification: '4',
     creationDate: undefined,
     sensorType: ['OTHER'],
     rms: undefined,

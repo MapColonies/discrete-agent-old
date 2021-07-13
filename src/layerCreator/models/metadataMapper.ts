@@ -1,15 +1,16 @@
 import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes, SensorType } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
-import { FeatureCollection, GeoJSON } from 'geojson';
+import { FeatureCollection, GeoJSON, Polygon } from 'geojson';
 import { get as readProp, toNumber, isNil } from 'lodash';
 import { toBoolean } from '../../common/utilities/typeConvertors';
 import { FileMapper } from './fileMapper';
+import { Classifier } from './classifier';
 
 @injectable()
 export class MetadataMapper {
   private readonly mappings: IPropSHPMapping[];
 
-  public constructor(private readonly fileMapper: FileMapper) {
+  public constructor(private readonly fileMapper: FileMapper, private readonly classifier: Classifier) {
     this.mappings = LayerMetadata.getShpMappings();
   }
 
@@ -20,6 +21,7 @@ export class MetadataMapper {
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
+    this.calculateClassification(metadata, metadataGeoJson);
     return metadata;
   }
 
@@ -92,6 +94,16 @@ export class MetadataMapper {
 
   private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
     metadata.layerPolygonParts = metadataGeoJson;
+  }
+
+  private calculateClassification(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const features = (metadataGeoJson as FeatureCollection).features;
+    const props = features[0].properties;
+    const coords = (features[0].geometry as Polygon).coordinates;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const resolutionStr = (props as { Resolution: string }).Resolution;
+    const resolution = toNumber(resolutionStr);
+    metadata.classification = this.classifier.getClassification(resolution, coords).toString();
   }
 
   private castValue(value: unknown, type: string): unknown {

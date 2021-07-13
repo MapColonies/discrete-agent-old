@@ -1,0 +1,53 @@
+{
+  "polygonCoordinates": [
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  ],
+  "defaultValue": 5,
+  "resolutionRules": [
+    {
+      "name": "high res in polygon",
+      "value": 1,
+      "minResolution": 0.1,
+      "minDataInclusionRate": 0.95
+    },
+    {
+      "name": "high res out of polygon",
+      "value": 2,
+      "minResolution": 0.1,
+      "minDataInclusionRate": 0
+    },
+    {
+      "name": "med res in polygon",
+      "value": 3,
+      "minResolution": 0.5,
+      "minDataInclusionRate": 0.5
+    },
+    {
+      "name": "med res out of polygon",
+      "value": 4,
+      "minResolution": 0.5,
+      "minDataInclusionRate": 0
+    }
+  ]
+}
