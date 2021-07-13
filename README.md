@@ -9,7 +9,7 @@
 
 ----------------------------------
 
-This is a service is used to trigger Map Colonies discrete ingestion flow by watch file system or though rest trigger.
+This service is used to trigger Map Colonies discrete ingestion flow by watching file system or through rest trigger.
 
 ### required file system structure:
 each discrete should be in it's own directory and contain the following structure:
@@ -17,7 +17,7 @@ each discrete should be in it's own directory and contain the following structur
   - tiff files for discrete creation process
   - tfw file for each tiff file
 - `Shapes` directory with the following files:
-  - `Files.shp` and `Files.dbf` with list of tiffs for the discrete. each record should contain `File Name` field (without extension) and `Format` field with the value `Tiff` and the bounding box of each tiff file.
+  - `Files.shp` and `Files.dbf` with a list of tiffs for the discrete. each record should contain `File Name` field (without extension) and `Format` field with the value `Tiff` and the bounding box of each tiff file.
   - `Product.shp` and `Product.dbf` with single record with the following attributes:
     - `Name` - the name of the discrete layer.
     - `Type` - the discrete layer type (eg. `Orthophoto`).
