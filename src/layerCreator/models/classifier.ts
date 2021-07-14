@@ -39,7 +39,7 @@ export class Classifier {
     const intersectionRate = intersectionArea / area(polygonFeature);
     for (let i = 0; i < this.resolutionRules.length; i++) {
       const rule = this.resolutionRules[i];
-      if (intersectionRate >= rule.minDataInclusionRate && resolution <= rule.minResolution) {
+      if (intersectionRate >= rule.minDataInclusionRate && resolution < rule.minResolution) {
         return rule.value;
       }
     }
