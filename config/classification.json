@@ -20,7 +20,7 @@
       "name": "high res out of polygon",
       "value": 2,
       "minResolution": 0.1,
-      "minDataInclusionRate": -1
+      "minDataInclusionRate": 0
     },
     {
       "name": "med res in polygon",

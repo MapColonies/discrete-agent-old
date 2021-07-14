@@ -69,9 +69,9 @@ the json should contain the following values:
   - holes: array of internal boundaries that should be external (optional).
 - `defaultValue`: default value for classification if no specific rule applies (number).
 - `resolutionRules`: array of resolution based classification rules. if multiple rules match the data the minimum classification value will be applied. each rule should have the following fields:
-  - `name` - rule name to make the configuration easier to maintain\ (optional).
+  - `name` - rule name to make the configuration easier to maintain (optional).
   - `value` - classification value for discrete layers that match the minimum resolution and minimum inclusion rate criterions.
-  - `minResolution` - the minimal resolution(not inclusive) required to match the rule in meters/pixel (lower number is higher resolution therefore resolution of 0.1 will match rule with minimal resolution of 0.5 but 0.6 will not).
+  - `minResolution` - the minimal resolution (not inclusive) required to match the rule in meters/pixel (lower number is higher resolution therefore resolution of 0.1 will match rule with minimal resolution of 0.5 but 0.6 will not).
   - `minDataInclusionRate` - minimal part of the discrete layer area that must cover the inner area to match the rule (eg. 0.9 is 90% of the discrete layer must be in the inner area to match the rule).
 
 ### usage:
