@@ -14,7 +14,7 @@ function registerExternalValues(): void {
   const logger = new MCLogger(loggerConfig, service);
   container.register<IConfig>(Services.CONFIG, { useValue: config });
   container.register<ILogger>(Services.LOGGER, { useValue: logger });
-  container.register<Probe>(Probe, { useFactory: getProbe });
+  container.register<Probe>(Probe, { useValue: getProbe(container) });
 }
 
 export { registerExternalValues };
