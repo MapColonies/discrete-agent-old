@@ -2,12 +2,12 @@ import { dirname, join as joinPath } from 'path';
 import { promises, Dir, OpenDirOptions } from 'fs';
 import { container, inject, singleton } from 'tsyringe';
 import { toInteger } from 'lodash';
+import { Probe } from '@map-colonies/mc-probe';
 import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
 import { AgentDbClient } from '../serviceClients/agentDbClient';
 import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
-import { Probe } from '@map-colonies/mc-probe';
 
 interface WatchOptions {
   minTriggerDepth: number;
@@ -35,16 +35,19 @@ export class Watcher {
     this.watching = false;
     this.loadWatchOptions(config);
 
-    this.dbClient.getWatchStatus().then((data) => {
-      this.watching = data.isWatching;
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (this.watching) {
-        this.internalStartWatch();
-      }
-    }).catch(() => {
-      const probe = container.resolve<Probe>(Probe);
-      probe.liveFlag = false;
-    });
+    this.dbClient
+      .getWatchStatus()
+      .then((data) => {
+        this.watching = data.isWatching;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (this.watching) {
+          this.internalStartWatch();
+        }
+      })
+      .catch(() => {
+        const probe = container.resolve<Probe>(Probe);
+        probe.liveFlag = false;
+      });
   }
 
   public async stopWatching(): Promise<void> {
