@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.3](https://github.com/MapColonies/discrete-agent/compare/v1.2.2...v1.2.3) (2021-08-19)
+
+
+### Bug Fixes
+
+* unhanlded promise rejection when db is down ([#68](https://github.com/MapColonies/discrete-agent/issues/68)) ([49c3511](https://github.com/MapColonies/discrete-agent/commit/49c35117c1c70e24e53e276f8ef432840b332231))
+
 ### [1.2.2](https://github.com/MapColonies/discrete-agent/compare/v1.2.1...v1.2.2) (2021-07-15)
 
 ### [1.2.1](https://github.com/MapColonies/discrete-agent/compare/v1.2.0...v1.2.1) (2021-07-13)
