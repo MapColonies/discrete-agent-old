@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 export const metadata = {
-  updateDate: '2019-06-04T00:00:00.000Z',
   resolution: 0.0000018519,
   accuracyCE90: 1,
   sensorType: ['OTHER'],
@@ -31,8 +30,9 @@ export const metadata = {
   productId: 'LAYER',
   productName: 'product',
   productType: 'Orthophoto',
-  sourceDateEnd: '2019-06-04T00:00:00.000Z',
-  sourceDateStart: '2019-06-04T00:00:00.000Z',
+  updateDate: '2019-04-06T00:00:00.000Z',
+  sourceDateEnd: '2019-04-06T00:00:00.000Z',
+  sourceDateStart: '2019-04-06T00:00:00.000Z',
   type: 'RECORD_RASTER',
   layerPolygonParts: {
     type: 'FeatureCollection',
