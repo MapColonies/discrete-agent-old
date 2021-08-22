@@ -2,6 +2,7 @@ import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes, SensorType } fro
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON, Polygon } from 'geojson';
 import { get as readProp, toNumber, isNil } from 'lodash';
+import moment from 'moment';
 import { toBoolean } from '../../common/utilities/typeConvertors';
 import { FileMapper } from './fileMapper';
 import { Classifier } from './classifier';
@@ -40,7 +41,7 @@ export class MetadataMapper {
     productGeoJson: GeoJSON,
     metadataGeoJson: GeoJSON,
     filesGeoJson: GeoJSON,
-    tfwFile: string[]
+    tfwFile: string[],
   ): void {
     const metadata = (baseMetadata as unknown) as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
@@ -114,7 +115,7 @@ export class MetadataMapper {
       case TsTypes.BOOLEAN.value:
         return toBoolean(value);
       case TsTypes.DATE.value:
-        return new Date((value as string) + 'z');
+        return moment.utc((value as string), 'DD/MM/YYYY').toDate();
       case TsTypes.NUMBER.value:
         return toNumber(value);
       default:
