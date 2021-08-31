@@ -1,5 +1,4 @@
 import { dirname, join as joinPath } from 'path';
-import { promises, Dir, OpenDirOptions } from 'fs';
 import { container, inject, singleton } from 'tsyringe';
 import { toInteger } from 'lodash';
 import { Probe } from '@map-colonies/mc-probe';
@@ -7,6 +6,7 @@ import { IConfig, ILogger } from '../common/interfaces';
 import { Services } from '../common/constants';
 import { Trigger } from '../layerCreator/models/trigger';
 import { AgentDbClient } from '../serviceClients/agentDbClient';
+import { DirWalker, IDirWalkerOptions } from '../common/utilities/dirWalker';
 import { AsyncLockDoneCallback, LimitingLock } from './limitingLock';
 
 interface WatchOptions {
@@ -21,17 +21,16 @@ export class Watcher {
   private watcherInterval!: number;
   private minTriggerDepth!: number;
   private maxWatchDepth!: number;
-  //required for testing as fs promises cant be mocked here
-  private readonly opendir: (path: string, options?: OpenDirOptions | undefined) => Promise<Dir>;
+  private walkerOptions!: IDirWalkerOptions;
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly dbClient: AgentDbClient,
     private readonly trigger: Trigger,
-    private readonly lock: LimitingLock
+    private readonly lock: LimitingLock,
+    private readonly dirWalker: DirWalker
   ) {
-    this.opendir = promises.opendir;
     this.watching = false;
     this.loadWatchOptions(config);
 
@@ -81,6 +80,10 @@ export class Watcher {
     this.minTriggerDepth = toInteger(options.minTriggerDepth);
     this.maxWatchDepth = toInteger(options.maxWatchDepth);
     this.watcherInterval = toInteger(options.interval);
+    this.walkerOptions = {
+      minDepth: this.minTriggerDepth,
+      maxDepth: this.maxWatchDepth,
+    };
   }
 
   private internalStartWatch(): void {
@@ -113,21 +116,12 @@ export class Watcher {
     });
   }
 
-  private async walkDir(path: string, depth = 0): Promise<void> {
-    const dir = await this.opendir(path);
-    for await (const dirent of dir) {
-      const itemPath = joinPath(path, dirent.name);
-      if (dirent.isDirectory()) {
-        if (this.maxWatchDepth > depth) {
-          await this.walkDir(itemPath, depth + 1);
-        }
-      } else if (dirent.isFile()) {
-        if (this.minTriggerDepth <= depth) {
-          this.triggerFile(itemPath);
-        }
-      }
+  private async walkDir(path: string): Promise<void> {
+    const gen = this.dirWalker.walk(path, this.walkerOptions);
+    for await (const itemPath of gen) {
+      this.triggerFile(itemPath);
     }
-    if (depth === 0 && this.isWatching()) {
+    if (this.isWatching()) {
       setTimeout(this.startIteration.bind(this), this.watcherInterval);
     }
   }
