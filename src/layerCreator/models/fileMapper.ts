@@ -41,15 +41,6 @@ export class FileMapper {
     this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
-  public getFilePath(fileName: string, fileFormat: string): string {
-    const mapping = this.fileMappings[fileFormat];
-    if (mapping !== undefined) {
-      return join(`${fileName}.${mapping.fileExtension}`);
-    } else {
-      return `${fileName}.${fileFormat}`;
-    }
-  }
-
   public getRootDir(file: string): string {
     let relPath = relative(this.watchDir, file);
     if (relPath.startsWith('.')) {
@@ -67,6 +58,38 @@ export class FileMapper {
     const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
     const matcher = new RegExp(`.*${sanitizedPattern}`);
     return this.dirWalker.findFile(root, matcher);
+  }
+
+  public async findFilesRelativePaths(files: string[], rootPath: string): Promise<string[]> {
+    if (!rootPath.endsWith(sep)) {
+      rootPath += sep;
+    }
+    const filePatterns = [];
+    for (const file of files) {
+      const filePattern = `${sep}${file}`;
+      const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
+      filePatterns.push(`(.*${sanitizedPattern}^)`);
+    }
+    const pattern = filePatterns.join('|');
+    const matcher = new RegExp(pattern).compile();
+    const filePathsGen = this.dirWalker.walk(rootPath, {
+      filePathMatcher: matcher,
+      maxResults: files.length,
+    });
+    const filePaths = [];
+    for await (const path of filePathsGen) {
+      filePaths.push(relative(rootPath, path));
+    }
+    return filePaths;
+  }
+
+  public getFilePath(fileName: string, fileFormat: string): string {
+    const mapping = this.fileMappings[fileFormat];
+    if (mapping !== undefined) {
+      return join(`${fileName}.${mapping.fileExtension}`);
+    } else {
+      return `${fileName}.${fileFormat}`;
+    }
   }
 
   private stripSubDirs(directory: string): string {

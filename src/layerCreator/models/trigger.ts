@@ -21,6 +21,7 @@ import { FileMapper } from './fileMapper';
 export class Trigger {
   private readonly mountDir: string;
   private readonly retryOptions: retry.Options;
+  private readonly shpFiles = ['Files.shp', 'Files.dbf', 'Product.shp', 'Product.dbf', 'ShapeMetadata.shp', 'ShapeMetadata.dbf'];
 
   public constructor(
     private readonly shpParser: ShpParser,
@@ -52,44 +53,57 @@ export class Trigger {
       }
     }
     //check if all shp files exists
-    const filesShp = await this.fileMapper.getFileFullPath('Files', 'shp', directory);
-    const filesDbf = await this.fileMapper.getFileFullPath('Files', 'dbf', directory);
-    const productShp = await this.fileMapper.getFileFullPath('Product', 'shp', directory);
-    const productDbf = await this.fileMapper.getFileFullPath('Product', 'dbf', directory);
-    const metadataShp = await this.fileMapper.getFileFullPath('ShapeMetadata', 'shp', directory);
-    const metadataDbf = await this.fileMapper.getFileFullPath('ShapeMetadata', 'dbf', directory);
-    if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
+    const shpFilesPaths = await this.fileMapper.findFilesRelativePaths(this.shpFiles, relDir);
+    if (shpFilesPaths.length === this.shpFiles.length) {
+      //map shp file paths
+      let filesShp!: string, filesDbf!: string, productShp!: string, productDbf!: string, metadataShp!: string, metadataDbf!: string;
+      for (const path of shpFilesPaths) {
+        if (path.endsWith(this.shpFiles[0])) {
+          filesShp = path;
+        } else if (path.endsWith(this.shpFiles[1])) {
+          filesDbf = path;
+        } else if (path.endsWith(this.shpFiles[2])) {
+          productShp = path;
+        } else if (path.endsWith(this.shpFiles[3])) {
+          productDbf = path;
+        } else if (path.endsWith(this.shpFiles[4])) {
+          metadataShp = path;
+        } else if (path.endsWith(this.shpFiles[5])) {
+          metadataDbf = path;
+        }
+      }
       //read file list
-      const filesGeoJson = await this.tryParseShp(filesShp as string, filesDbf as string, isManual, directory);
+      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, relDir);
       if (!filesGeoJson) {
         return;
       }
-      const files = this.metadataMapper.parseFilesShpJson(filesGeoJson);
-      if (!(await this.fileManager.validateLayerFilesExists(directory, files))) {
+      const fileNames = this.metadataMapper.parseFilesShpJson(filesGeoJson);
+      const files = await this.fileMapper.findFilesRelativePaths(fileNames, relDir);
+      if (files.length != fileNames.length) {
         if (isManual) {
-          await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);
+          await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED);
           throw new BadRequestError('some of the required files are missing');
         }
         return;
       }
       const tfwFileName = readProp(filesGeoJson, "features[0].properties['File Name']") as string;
-      const tfwFilePath = path.join(directory, this.fileMapper.getFilePath(tfwFileName, 'tfw'));
-      if (!(await this.fileManager.fileExists(tfwFilePath))) {
+      const tfwFilePath = await this.fileMapper.getFileFullPath(tfwFileName, 'tfw', relDir);
+      if (tfwFilePath === undefined) {
         if (isManual) {
           await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);
-          throw new BadRequestError(`${tfwFilePath} is missing`);
+          throw new BadRequestError(`${tfwFileName} tfw is missing`);
         }
         return;
       }
       // parse all data files and convert to model
-      const productGeoJson = await this.tryParseShp(productShp as string, productDbf as string, isManual, directory);
-      const metaDataGeoJson = await this.tryParseShp(metadataShp as string, metadataDbf as string, isManual, directory);
+      const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual, directory);
+      const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual, directory);
       if (!productGeoJson || !metaDataGeoJson) {
         return;
       }
       const tfwFile = await this.fileManager.readAllLines(tfwFilePath);
       const ingestionData: IngestionParams = {
-        fileNames: this.metadataMapper.parseFilesShpJson(filesGeoJson),
+        fileNames: files,
         metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson, tfwFile),
         originDirectory: relDir,
       };
