@@ -15,7 +15,7 @@ import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 import { configMock, getMock } from '../../../mocks/config';
-import { fileMapperMock, stripSubDirsMock, getFilePathMock } from '../../../mocks/fileMapper';
+import { fileMapperMock, getFilePathMock, getRootDirMock } from '../../../mocks/fileMapper';
 import { tfw } from '../../../mockData/tfw';
 import { metadata } from '../../../mockData/layerMetadata';
 import { ingestionParams } from '../../../mockData/ingestionParams';
@@ -51,7 +51,6 @@ describe('trigger', () => {
   beforeEach(() => {
     configData['mountDir'] = '/mountDir';
     getMock.mockImplementation((key: string) => configData[key]);
-    stripSubDirsMock.mockImplementation((dir: string) => dir);
     getFilePathMock.mockImplementation((file: string, extension: string) => `${file}.${extension}`);
     readAllLinesMock.mockResolvedValue(tfw);
   });
@@ -75,6 +74,7 @@ describe('trigger', () => {
       parseFilesShpJsonMock.mockReturnValue(fileList);
       mapMock.mockReturnValue(expectedMetadata);
       fileExistsMock.mockResolvedValue(true);
+      getRootDirMock.mockReturnValue('test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -222,8 +222,6 @@ describe('trigger', () => {
 
     it('auto trigger will retry parsing invalid shp files if only one task is queued', async function () {
       // set mock values
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
       getDiscreteStatusMock.mockResolvedValue(undefined);
       isQueueEmptyMock.mockReturnValue(true);
       parseMock.mockRejectedValue(new Error('tests'));

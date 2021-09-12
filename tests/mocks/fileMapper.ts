@@ -1,11 +1,15 @@
 import { FileMapper } from '../../src/layerCreator/models/fileMapper';
 
-const stripSubDirsMock = jest.fn();
 const getFilePathMock = jest.fn();
+const getRootDirMock = jest.fn();
+const getFileFullPathMock = jest.fn();
+const findFilesRelativePathsMock = jest.fn();
 
 const fileMapperMock = ({
-  stripSubDirs: stripSubDirsMock,
   getFilePath: getFilePathMock,
+  getRootDir: getRootDirMock,
+  getFileFullPath: getFileFullPathMock,
+  findFilesRelativePaths: findFilesRelativePathsMock,
 } as unknown) as FileMapper;
 
-export { fileMapperMock, stripSubDirsMock, getFilePathMock };
+export { fileMapperMock, getFilePathMock, getRootDirMock, getFileFullPathMock, findFilesRelativePathsMock };
