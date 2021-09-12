@@ -5,13 +5,23 @@ import { singleton } from 'tsyringe';
 @singleton()
 export class FilesManager {
   public async validateShpFilesExists(
-    filesShp: string,
-    filesDbf: string,
-    productShp: string,
-    productDbf: string,
-    metadataShp: string,
-    metadataDbf: string
+    filesShp: string | undefined,
+    filesDbf: string | undefined,
+    productShp: string | undefined,
+    productDbf: string | undefined,
+    metadataShp: string | undefined,
+    metadataDbf: string | undefined
   ): Promise<boolean> {
+    if (
+      filesShp === undefined ||
+      filesDbf === undefined ||
+      productShp === undefined ||
+      productDbf === undefined ||
+      metadataShp === undefined ||
+      metadataDbf === undefined
+    ) {
+      return false;
+    }
     const filesExist = await Promise.all([
       this.fileExists(filesShp),
       this.fileExists(filesDbf),

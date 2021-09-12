@@ -1,4 +1,4 @@
-import { join, normalize, sep, relative, resolve } from 'path';
+import { join, sep, relative, resolve } from 'path';
 import { inject, singleton } from 'tsyringe';
 import { Services } from '../../common/constants';
 import { IConfig, ILogger } from '../../common/interfaces';
@@ -28,21 +28,17 @@ export class FileMapper {
       fileExtension: 'tfw',
     },
   };
-  private stripSubDirsRegex!: RegExp;
   private escapePathRegex!: RegExp;
+  private readonly rootDirNestingLevel: number;
 
   public constructor(
     @inject(Services.CONFIG) config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
     private readonly dirWalker: DirWalker
   ) {
-    this.generateStripSubDirsRegex();
+    this.generateRegexPatterns();
     this.watchDir = join(config.get('mountDir'), config.get('watcher.watchDirectory'));
-  }
-
-  public stripSubDirs(directory: string): string {
-    //TODO: modifiy
-    return directory.replace(this.stripSubDirsRegex, '');
+    this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
   public getFilePath(fileName: string, fileFormat: string): string {
@@ -65,7 +61,7 @@ export class FileMapper {
     return baseDir;
   }
 
-  public async getFile(fileName: string, fileFormat: string, currentPath: string): Promise<string | undefined> {
+  public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string): Promise<string | undefined> {
     const root = this.getRootDir(currentPath);
     const filePattern = `${sep}${this.getFilePath(fileName, fileFormat)}`;
     const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
@@ -73,14 +69,17 @@ export class FileMapper {
     return this.dirWalker.findFile(root, matcher);
   }
 
-  private generateStripSubDirsRegex(): void {
+  private stripSubDirs(directory: string): string {
+    const parts = directory.split(sep);
+    const maxParts = parts[0] === '.' ? this.rootDirNestingLevel + 1 : this.rootDirNestingLevel;
+    const rootParts: string[] = [];
+    for (let i = 0; i < maxParts; i++) {
+      rootParts.push(parts[i]);
+    }
+    return rootParts.join(sep);
+  }
+
+  private generateRegexPatterns(): void {
     this.escapePathRegex = /[.*+?^${}()|[\]\\]/g.compile();
-    const subPaths = Object.values(this.fileMappings).map((mapping) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const path = normalize(mapping!.pathPrefix);
-      return path.replace(this.escapePathRegex, '\\$&'); //escape for regex
-    });
-    const pattern = `(^|\\${sep})(${subPaths.join('|')})$`;
-    this.stripSubDirsRegex = new RegExp(pattern).compile();
   }
 }

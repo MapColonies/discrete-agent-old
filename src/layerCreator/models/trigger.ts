@@ -38,8 +38,7 @@ export class Trigger {
   }
 
   public async trigger(directory: string, isManual = false): Promise<void> {
-    directory = this.fileMapper.stripSubDirs(directory);
-    const relDir = path.relative(this.mountDir, directory);
+    const relDir = this.fileMapper.getRootDir(directory);
     this.logger.log('debug', `mount: ${this.mountDir} , full dir: ${directory} , relative dir: ${relDir}`);
     const status = await this.agentDbClient.getDiscreteStatus(relDir);
     if (status === undefined) {
@@ -53,15 +52,15 @@ export class Trigger {
       }
     }
     //check if all shp files exists
-    const filesShp = path.join(directory, this.fileMapper.getFilePath('Files', 'shp'));
-    const filesDbf = path.join(directory, this.fileMapper.getFilePath('Files', 'dbf'));
-    const productShp = path.join(directory, this.fileMapper.getFilePath('Product', 'shp'));
-    const productDbf = path.join(directory, this.fileMapper.getFilePath('Product', 'dbf'));
-    const metadataShp = path.join(directory, this.fileMapper.getFilePath('ShapeMetadata', 'shp'));
-    const metadataDbf = path.join(directory, this.fileMapper.getFilePath('ShapeMetadata', 'dbf'));
+    const filesShp = await this.fileMapper.getFileFullPath('Files', 'shp', directory);
+    const filesDbf = await this.fileMapper.getFileFullPath('Files', 'dbf', directory);
+    const productShp = await this.fileMapper.getFileFullPath('Product', 'shp', directory);
+    const productDbf = await this.fileMapper.getFileFullPath('Product', 'dbf', directory);
+    const metadataShp = await this.fileMapper.getFileFullPath('ShapeMetadata', 'shp', directory);
+    const metadataDbf = await this.fileMapper.getFileFullPath('ShapeMetadata', 'dbf', directory);
     if (await this.fileManager.validateShpFilesExists(filesShp, filesDbf, productShp, productDbf, metadataShp, metadataDbf)) {
       //read file list
-      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, directory);
+      const filesGeoJson = await this.tryParseShp(filesShp as string, filesDbf as string, isManual, directory);
       if (!filesGeoJson) {
         return;
       }
@@ -83,8 +82,8 @@ export class Trigger {
         return;
       }
       // parse all data files and convert to model
-      const productGeoJson = await this.tryParseShp(productShp, productDbf, isManual, directory);
-      const metaDataGeoJson = await this.tryParseShp(metadataShp, metadataDbf, isManual, directory);
+      const productGeoJson = await this.tryParseShp(productShp as string, productDbf as string, isManual, directory);
+      const metaDataGeoJson = await this.tryParseShp(metadataShp as string, metadataDbf as string, isManual, directory);
       if (!productGeoJson || !metaDataGeoJson) {
         return;
       }
