@@ -14,4 +14,4 @@ const loggerMock = ({
   log: logMock,
 } as unknown) as MCLogger;
 
-export { loggerMock };
+export { loggerMock, errorMock, warnMock, infoMock, debugMock, logMock };

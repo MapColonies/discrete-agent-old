@@ -5,6 +5,7 @@ export function getFsItem(fsRoot: FsItem, path: string): FsItem | undefined {
   let item = fsRoot;
   for (const key of keys) {
     item = (item.content as Record<string, FsItem>)[key];
+    console.log(key, item);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (item === undefined) {
       break;

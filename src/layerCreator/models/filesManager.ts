@@ -3,6 +3,9 @@ import { singleton } from 'tsyringe';
 
 @singleton()
 export class FilesManager {
+  //required for testing as fs promises cant be mocked here
+  public openDir = fsPromise.opendir;
+
   public async fileExists(path: string): Promise<boolean> {
     return fsPromise
       .access(path, fsConstants.F_OK)

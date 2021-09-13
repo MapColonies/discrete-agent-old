@@ -1,4 +1,3 @@
-import { normalize } from 'path';
 import { FileMapper } from '../../../../src/layerCreator/models/fileMapper';
 import { configMock, registerDefaultConfig } from '../../../mocks/config';
 import { dirWalkerMock } from '../../../mocks/dirWalker';
@@ -24,7 +23,6 @@ describe('FileMapper', () => {
       const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
       const mappings = ((fileMapper as unknown) as { fileMappings: Record<string, unknown> }).fileMappings;
       mappings['test'] = {
-        pathPrefix: 'b/test',
         fileExtension: 'ext',
       };
 
@@ -32,7 +30,7 @@ describe('FileMapper', () => {
       const cleanPath = fileMapper.getFilePath('test', 'test');
 
       // expectation
-      expect(cleanPath).toEqual(normalize('b/test/test.ext'));
+      expect(cleanPath).toEqual('test.ext');
     });
   });
 

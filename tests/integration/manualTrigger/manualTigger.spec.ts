@@ -3,10 +3,12 @@ import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import axiosMock from 'jest-mock-axios';
 import { registerTestValues } from '../testContainerConfig';
-import { validateLayerFilesExistsMock, validateShpFilesExistsMock, fileExistsMock, readAllLinesMock } from '../../mocks/filesManager';
+import { fileExistsMock, readAllLinesMock } from '../../mocks/filesManager';
 import { initShapeFileMock } from '../../mocks/shapeFile';
 import { registerDefaultConfig } from '../../mocks/config';
+import { init as initFs } from '../../mocks/fs/opendir';
 import { tfw } from '../../mockData/tfw';
+import { withoutTfw } from '../../mockData/fs';
 import * as requestSender from './helpers/requestSender';
 
 describe('manualTrigger', function () {
@@ -48,8 +50,6 @@ describe('manualTrigger', function () {
 
   describe('Happy Path', function () {
     it('should return 200 status code when triggered on layer root dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
       fileExistsMock.mockResolvedValue(true);
       readAllLinesMock.mockResolvedValue(tfw);
@@ -60,15 +60,11 @@ describe('manualTrigger', function () {
       const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
       expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
       expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
 
     it('should return 200 status code when triggered on layer Shapes dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
       fileExistsMock.mockResolvedValue(true);
       readAllLinesMock.mockResolvedValue(tfw);
@@ -79,15 +75,11 @@ describe('manualTrigger', function () {
       const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
       expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
       expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
 
     it('should return 200 status code when triggered on layer tiff dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
       fileExistsMock.mockResolvedValue(true);
       readAllLinesMock.mockResolvedValue(tfw);
@@ -98,8 +90,6 @@ describe('manualTrigger', function () {
       const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
       expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
       expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
     });
@@ -118,8 +108,6 @@ describe('manualTrigger', function () {
     });
 
     it('should return 400 when tiff files are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(false);
-      validateShpFilesExistsMock.mockResolvedValue(true);
       axiosMock.post.mockResolvedValue({});
       const validRequest = {
         sourceDirectory: 'testDir',
@@ -131,8 +119,6 @@ describe('manualTrigger', function () {
     });
 
     it('should return 400 when shp files are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(false);
       axiosMock.post.mockResolvedValue({});
       const validRequest = {
         sourceDirectory: 'testDir',
@@ -143,9 +129,8 @@ describe('manualTrigger', function () {
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
 
-    it('should return 400 when first tfw file are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
+    it.only('should return 400 when first tfw file are missing', async () => {
+      initFs(withoutTfw);
       axiosMock.post.mockResolvedValue({});
       fileExistsMock.mockResolvedValue(false);
       const validRequest = {

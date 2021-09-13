@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
 import retry from 'async-retry';
@@ -39,7 +38,7 @@ export class Trigger {
   }
 
   public async trigger(directory: string, isManual = false): Promise<void> {
-    const relDir = this.fileMapper.getRootDir(directory);
+    const relDir = this.fileMapper.getRootDir(directory, isManual);
     this.logger.log('debug', `mount: ${this.mountDir} , full dir: ${directory} , relative dir: ${relDir}`);
     const status = await this.agentDbClient.getDiscreteStatus(relDir);
     if (status === undefined) {
@@ -54,6 +53,10 @@ export class Trigger {
     }
     //check if all shp files exists
     const shpFilesPaths = await this.fileMapper.findFilesRelativePaths(this.shpFiles, relDir);
+
+    //TODO: remove debug console
+    console.log(shpFilesPaths);
+
     if (shpFilesPaths.length === this.shpFiles.length) {
       //map shp file paths
       let filesShp!: string, filesDbf!: string, productShp!: string, productDbf!: string, metadataShp!: string, metadataDbf!: string;

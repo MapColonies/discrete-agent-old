@@ -13,6 +13,7 @@ type FileMappings = Record<string, IFileMapping | undefined>;
 @singleton()
 export class FileMapper {
   private readonly watchDir: string;
+  private readonly mountDir: string;
   private readonly fileMappings: FileMappings = {
     shp: {
       fileExtension: 'shp',
@@ -37,19 +38,21 @@ export class FileMapper {
     private readonly dirWalker: DirWalker
   ) {
     this.generateRegexPatterns();
-    this.watchDir = join(config.get('mountDir'), config.get('watcher.watchDirectory'));
+    this.mountDir = config.get('mountDir');
+    this.watchDir = join(this.mountDir, config.get('watcher.watchDirectory'));
     this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
-  public getRootDir(file: string): string {
-    let relPath = relative(this.watchDir, file);
+  public getRootDir(file: string, isManual = false): string {
+    const baseDir = isManual ? this.mountDir : this.watchDir;
+    let relPath = relative(baseDir, file);
     if (relPath.startsWith('.')) {
       const pointAndSeparatorLength = 2;
       relPath = relPath.slice(pointAndSeparatorLength, undefined);
     }
     const relBaseDir = this.stripSubDirs(relPath);
-    const baseDir = resolve(this.watchDir, relBaseDir);
-    return baseDir;
+    const rootDir = resolve(baseDir, relBaseDir);
+    return rootDir;
   }
 
   public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string): Promise<string | undefined> {
