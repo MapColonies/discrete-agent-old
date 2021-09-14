@@ -106,6 +106,6 @@ export class FileMapper {
   }
 
   private generateRegexPatterns(): void {
-    this.escapePathRegex = /[.*+?^${}()|[\]\\]/g.compile();
+    this.escapePathRegex = /[.*+?^${}()|[\]\\]/g;
   }
 }

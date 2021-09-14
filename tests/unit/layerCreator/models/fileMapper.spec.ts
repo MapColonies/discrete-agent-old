@@ -57,7 +57,7 @@ describe('FileMapper', () => {
     it('searches the correct file', async () => {
       const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
 
-      await fileMapper.getFileFullPath('file', 'tiff', '/layerSources/watch/a/b/c');
+      await fileMapper.getFileFullPath('file', 'Tiff', '/layerSources/watch/a/b/c');
 
       expect(findFileMock).toHaveBeenCalledTimes(1);
 
