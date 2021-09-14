@@ -19,22 +19,22 @@ describe('dirWalker', () => {
       const res = await asyncGenToArray(gen);
 
       const expectedFiles = [
-        normalize('layerSources\\testDir\\Shapes\\Files.shp'),
-        normalize('layerSources\\testDir\\Shapes\\Files.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\Product.shp'),
-        normalize('layerSources\\testDir\\Shapes\\Product.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\ShapeMetadata.shp'),
-        normalize('layerSources\\testDir\\Shapes\\ShapeMetadata.dbf'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1730.tfw'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1732.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1732.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1732.tif'),
+        normalize('layerSources/testDir/Shapes/Files.shp'),
+        normalize('layerSources/testDir/Shapes/Files.dbf'),
+        normalize('layerSources/testDir/Shapes/Product.shp'),
+        normalize('layerSources/testDir/Shapes/Product.dbf'),
+        normalize('layerSources/testDir/Shapes/ShapeMetadata.shp'),
+        normalize('layerSources/testDir/Shapes/ShapeMetadata.dbf'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1730.tfw'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1732.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1732.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1732.tif'),
       ];
       expect(res).toEqual(expectedFiles);
     });
@@ -48,9 +48,9 @@ describe('dirWalker', () => {
       const res = await asyncGenToArray(gen);
 
       const expectedFiles = [
-        normalize('layerSources\\testDir\\Shapes\\Files.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\Product.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\ShapeMetadata.dbf'),
+        normalize('layerSources/testDir/Shapes/Files.dbf'),
+        normalize('layerSources/testDir/Shapes/Product.dbf'),
+        normalize('layerSources/testDir/Shapes/ShapeMetadata.dbf'),
       ];
       expect(res).toEqual(expectedFiles);
     });
@@ -61,7 +61,7 @@ describe('dirWalker', () => {
       const gen = dirWalker.walk('', { maxResults: 2 });
       const res = await asyncGenToArray(gen);
 
-      const expectedFiles = [normalize('layerSources\\testDir\\Shapes\\Files.shp'), normalize('layerSources\\testDir\\Shapes\\Files.dbf')];
+      const expectedFiles = [normalize('layerSources/testDir/Shapes/Files.shp'), normalize('layerSources/testDir/Shapes/Files.dbf')];
       expect(res).toEqual(expectedFiles);
     });
 
@@ -72,16 +72,16 @@ describe('dirWalker', () => {
       const res = await asyncGenToArray(gen);
 
       const expectedFiles = [
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1730.tfw'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1881_Y1732.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1882_Y1732.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1730.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1731.tif'),
-        normalize('layerSources\\testDir\\a\\pyramid0_1\\layer\\X1883_Y1732.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1730.tfw'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1881_Y1732.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1882_Y1732.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1730.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1731.tif'),
+        normalize('layerSources/testDir/a/pyramid0_1/layer/X1883_Y1732.tif'),
       ];
       expect(res).toEqual(expectedFiles);
     });
@@ -93,12 +93,12 @@ describe('dirWalker', () => {
       const res = await asyncGenToArray(gen);
 
       const expectedFiles = [
-        normalize('layerSources\\testDir\\Shapes\\Files.shp'),
-        normalize('layerSources\\testDir\\Shapes\\Files.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\Product.shp'),
-        normalize('layerSources\\testDir\\Shapes\\Product.dbf'),
-        normalize('layerSources\\testDir\\Shapes\\ShapeMetadata.shp'),
-        normalize('layerSources\\testDir\\Shapes\\ShapeMetadata.dbf'),
+        normalize('layerSources/testDir/Shapes/Files.shp'),
+        normalize('layerSources/testDir/Shapes/Files.dbf'),
+        normalize('layerSources/testDir/Shapes/Product.shp'),
+        normalize('layerSources/testDir/Shapes/Product.dbf'),
+        normalize('layerSources/testDir/Shapes/ShapeMetadata.shp'),
+        normalize('layerSources/testDir/Shapes/ShapeMetadata.dbf'),
       ];
       expect(res).toEqual(expectedFiles);
     });
