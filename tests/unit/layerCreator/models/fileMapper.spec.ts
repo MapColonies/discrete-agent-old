@@ -1,6 +1,7 @@
+import { normalize } from 'path';
 import { FileMapper } from '../../../../src/layerCreator/models/fileMapper';
 import { configMock, registerDefaultConfig } from '../../../mocks/config';
-import { dirWalkerMock } from '../../../mocks/dirWalker';
+import { dirWalkerMock, findFileMock } from '../../../mocks/dirWalker';
 import { loggerMock } from '../../../mocks/logger';
 
 describe('FileMapper', () => {
@@ -34,7 +35,39 @@ describe('FileMapper', () => {
     });
   });
 
-  describe('getRootDir', () => {});
+  describe('getRootDir', () => {
+    it('returns discrete root path on manual trigger', () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
 
-  describe('getFileFullPath', () => {});
+      const root = fileMapper.getRootDir('/layerSources/watch/a/b/c', true);
+
+      expect(root.endsWith(normalize('/layerSources/watch'))).toEqual(true);
+    });
+
+    it('returns discrete root path on auto trigger', () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+
+      const root = fileMapper.getRootDir('/layerSources/watch/a/b/c', false);
+
+      expect(root.endsWith(normalize('/layerSources/watch/a'))).toEqual(true);
+    });
+  });
+
+  describe('getFileFullPath', () => {
+    it('searches the correct file', async () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+
+      await fileMapper.getFileFullPath('file', 'tiff', '/layerSources/watch/a/b/c');
+
+      expect(findFileMock).toHaveBeenCalledTimes(1);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const root = findFileMock.mock.calls[0][0] as string;
+      expect(root.endsWith(normalize('/layerSources/watch/a'))).toEqual(true);
+
+      const expectedMatcher = process.platform === 'win32' ? /.*\\file\.tif/ : /.*\/file\.tif/;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(findFileMock.mock.calls[0][1]).toEqual(expectedMatcher);
+    });
+  });
 });

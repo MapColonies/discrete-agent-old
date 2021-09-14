@@ -95,76 +95,7 @@ describe('watcher', () => {
   });
 
   describe('#fileWalker', () => {
-    //TODO: move to file walker unit tests
-    // it('scans the configured watch location', async () => {
-    //   initFsMock({});
-
-    //   await triggerWalkerOnce(watcher);
-
-    //   const expectedPath = joinPath(configData['mountDir'] as string, configData['watcher.watchDirectory'] as string);
-    //   expect(opendirMock).toHaveBeenCalledTimes(1);
-    //   expect(opendirMock).toHaveBeenCalledWith(expectedPath);
-    // });
-
-    //TODO: move to file walker unit tests
-    // it('stops at configured max depth', async () => {
-    //   initFsMock({
-    //     mountDir: {
-    //       watch: {
-    //         a: {
-    //           b: {
-    //             c: {
-    //               d: {},
-    //             },
-    //           },
-    //         },
-    //       },
-    //     },
-    //   });
-
-    //   await triggerWalkerOnce(watcher);
-
-    //   expect(opendirMock).toHaveBeenCalledTimes(3);
-    // });
-
     it('should only trigger for files after the min trigger depth', async () => {
-      //TODO: use in walkdir unit test
-      // initFsMock({
-      //   file1: 'file',
-      //   unmountedDir: {
-      //     file2: 'file',
-      //     watch: {
-      //       file3: 'file',
-      //       dir: {
-      //         file4: 'file',
-      //       },
-      //       fakeWatch: {
-      //         file5: 'file',
-      //         dir: {
-      //           file6: 'file',
-      //         },
-      //       },
-      //     },
-      //   },
-      //   mountDir: {
-      //     file7: 'file',
-      //     unWatched: {
-      //       file8: 'file',
-      //       dir: {
-      //         file9: 'file',
-      //       },
-      //     },
-      //     watch: {
-      //       file10: 'file',
-      //       dir: {
-      //         file11: 'file',
-      //         subdir: {
-      //           file12: 'file',
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
       const genMock = (function* () {
         yield Promise.resolve('mountDir/watch/dir/file10.file');
         yield Promise.resolve('mountDir/watch/dir/sub/file11.file');
