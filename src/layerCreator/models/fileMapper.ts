@@ -55,8 +55,8 @@ export class FileMapper {
     return rootDir;
   }
 
-  public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string): Promise<string | undefined> {
-    const root = this.getRootDir(currentPath);
+  public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string, isManual = false): Promise<string | undefined> {
+    const root = this.getRootDir(currentPath, isManual);
     const filePattern = `${sep}${this.getFilePath(fileName, fileFormat)}`;
     const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
     const matcher = new RegExp(`.*${sanitizedPattern}`);
@@ -71,10 +71,10 @@ export class FileMapper {
     for (const file of files) {
       const filePattern = `${sep}${file}`;
       const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
-      filePatterns.push(`(.*${sanitizedPattern}^)`);
+      filePatterns.push(`(^.*${sanitizedPattern}$)`);
     }
     const pattern = filePatterns.join('|');
-    const matcher = new RegExp(pattern).compile();
+    const matcher = new RegExp(pattern);
     const filePathsGen = this.dirWalker.walk(rootPath, {
       filePathMatcher: matcher,
       maxResults: files.length,

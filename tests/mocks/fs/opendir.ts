@@ -9,14 +9,16 @@ let fs: FsItem;
 function init(rawFs: object): void {
   fs = FsItem.generateFsFromObject(rawFs);
   opendirMock.mockImplementation(async (path) => {
-    console.log('path: ', path);
-    console.log(fs);
     const item = getFsItem(fs, path);
     // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    if (item !== undefined && item.isDirectory()) {
-      console.log('here');
-      const entries = Object.values(item.content as Record<string, FsItem>);
-      return Promise.resolve(entries);
+    if (item !== undefined) {
+      if (item.isDirectory()) {
+        const entries = Object.values(item.content as Record<string, FsItem>);
+        return Promise.resolve(entries);
+      }
+      if (item.isFile()) {
+        return [item];
+      }
     }
     return Promise.resolve([]);
   });

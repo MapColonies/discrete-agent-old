@@ -44,26 +44,17 @@ class DirWalker {
 
   private async *walkDir(path: string, options: IInternalOptions, depth = 0): AsyncGenerator<string> {
     const dir = await this.opendir(path);
-    //TODO: remove debug console
-    // console.log('dir: ', dir);
+
     for await (const dirent of dir) {
-      //TODO: remove debug console
-      // console.log('dirEnt: ', dirent);
       if (options.maxResults != undefined && options.yieldCount >= options.maxResults) {
-        //TODO: remove debug console
-        // console.log('stopped 1');
         return;
       }
       const itemPath = joinPath(path, dirent.name);
       if (dirent.isDirectory()) {
-        //TODO: remove debug console
-        // console.log('directory');
         if (options.maxDepth === undefined || options.maxDepth > depth) {
           yield* this.walkDir(itemPath, options, depth + 1);
         }
       } else if (dirent.isFile()) {
-        //TODO: remove debug console
-        // console.log('file: ', itemPath);
         if (options.minDepth === undefined || options.minDepth <= depth) {
           if (options.filePathMatcher === undefined || options.filePathMatcher.test(itemPath)) {
             options.yieldCount++;

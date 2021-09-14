@@ -53,10 +53,6 @@ export class Trigger {
     }
     //check if all shp files exists
     const shpFilesPaths = await this.fileMapper.findFilesRelativePaths(this.shpFiles, relDir);
-
-    //TODO: remove debug console
-    console.log(shpFilesPaths);
-
     if (shpFilesPaths.length === this.shpFiles.length) {
       //map shp file paths
       let filesShp!: string, filesDbf!: string, productShp!: string, productDbf!: string, metadataShp!: string, metadataDbf!: string;
@@ -90,7 +86,7 @@ export class Trigger {
         return;
       }
       const tfwFileName = readProp(filesGeoJson, "features[0].properties['File Name']") as string;
-      const tfwFilePath = await this.fileMapper.getFileFullPath(tfwFileName, 'tfw', relDir);
+      const tfwFilePath = await this.fileMapper.getFileFullPath(tfwFileName, 'tfw', relDir, isManual);
       if (tfwFilePath === undefined) {
         if (isManual) {
           await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);

@@ -35,4 +35,10 @@ const fullFs = {
 const withoutTfw = cloneDeep(fullFs);
 delete withoutTfw.layerSources.testDir.a.pyramid0_1.layer['X1881_Y1730.tfw'];
 
-export { fullFs, withoutTfw };
+const withoutProductDbf = cloneDeep(fullFs);
+delete withoutProductDbf.layerSources.testDir.Shapes['Product.dbf'];
+
+const withoutTiff = cloneDeep(fullFs);
+delete withoutTiff.layerSources.testDir.a.pyramid0_1.layer['X1881_Y1732.tif'];
+
+export { fullFs, withoutTfw, withoutProductDbf, withoutTiff };
