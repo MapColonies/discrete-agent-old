@@ -39,9 +39,9 @@ describe('FileMapper', () => {
     it('returns discrete root path on manual trigger', () => {
       const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
 
-      const root = fileMapper.getRootDir('/layerSources/watch/a/b/c', true);
+      const root = fileMapper.getRootDir('a/b/c', true);
 
-      expect(root.endsWith(normalize('/layerSources/watch'))).toEqual(true);
+      expect(root.endsWith(normalize('/layerSources/a/b/c'))).toEqual(true);
     });
 
     it('returns discrete root path on auto trigger', () => {

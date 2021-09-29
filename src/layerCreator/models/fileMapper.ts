@@ -43,9 +43,12 @@ export class FileMapper {
     this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
-  public getRootDir(file: string, isManual = false): string {
-    const baseDir = isManual ? this.mountDir : this.watchDir;
-    let relPath = relative(baseDir, file);
+  public getRootDir(path: string, isManual = false): string {
+    if (isManual) {
+      return resolve(this.mountDir, path);
+    }
+    const baseDir = this.watchDir;
+    let relPath = relative(baseDir, path);
     if (relPath.startsWith('.')) {
       const pointAndSeparatorLength = 2;
       relPath = relPath.slice(pointAndSeparatorLength, undefined);

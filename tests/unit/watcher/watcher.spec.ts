@@ -77,8 +77,6 @@ describe('watcher', () => {
       await watcher.startWatching();
       jest.runOnlyPendingTimers();
       await sleep(20);
-      //jest.runOnlyPendingTimers();
-      //await sleep(20);
 
       expect(setTimeout).toHaveBeenCalledTimes(2);
       expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 20);

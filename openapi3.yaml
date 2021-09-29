@@ -82,6 +82,7 @@ components:
         - sourceDirectory
       properties:
         sourceDirectory:
+          description: layer root directory relative to mount directory
           type: string
     watchStatus:
       type: object

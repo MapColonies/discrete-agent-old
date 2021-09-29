@@ -38,21 +38,21 @@ export class Trigger {
   }
 
   public async trigger(directory: string, isManual = false): Promise<void> {
-    const relDir = this.fileMapper.getRootDir(directory, isManual);
-    this.logger.log('debug', `mount: ${this.mountDir} , full dir: ${directory} , relative dir: ${relDir}`);
-    const status = await this.agentDbClient.getDiscreteStatus(relDir);
+    const rootDir = this.fileMapper.getRootDir(directory, isManual);
+    this.logger.log('debug', `triggering on directory: ${directory}`);
+    const status = await this.agentDbClient.getDiscreteStatus(rootDir);
     if (status === undefined) {
-      await this.agentDbClient.createDiscreteStatus(relDir);
+      await this.agentDbClient.createDiscreteStatus(rootDir);
     } else if (status.status === HistoryStatus.TRIGGERED || status.status === HistoryStatus.FAILED) {
       if (!isManual) {
-        this.logger.log('debug', `skipping directory ${relDir} its status is ${status.status}`);
+        this.logger.log('debug', `skipping directory ${rootDir} its status is ${status.status}`);
         return;
       } else {
-        await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.IN_PROGRESS);
+        await this.agentDbClient.updateDiscreteStatus(rootDir, HistoryStatus.IN_PROGRESS);
       }
     }
     //check if all shp files exists
-    const shpFilesPaths = await this.fileMapper.findFilesRelativePaths(this.shpFiles, relDir);
+    const shpFilesPaths = await this.fileMapper.findFilesRelativePaths(this.shpFiles, rootDir);
     if (shpFilesPaths.length === this.shpFiles.length) {
       //map shp file paths
       let filesShp!: string, filesDbf!: string, productShp!: string, productDbf!: string, metadataShp!: string, metadataDbf!: string;
@@ -72,12 +72,12 @@ export class Trigger {
         }
       }
       //read file list
-      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, relDir);
+      const filesGeoJson = await this.tryParseShp(filesShp, filesDbf, isManual, rootDir);
       if (!filesGeoJson) {
         return;
       }
       const fileNames = this.metadataMapper.parseFilesShpJson(filesGeoJson);
-      const files = await this.fileMapper.findFilesRelativePaths(fileNames, relDir);
+      const files = await this.fileMapper.findFilesRelativePaths(fileNames, rootDir);
       if (files.length != fileNames.length) {
         if (isManual) {
           await this.agentDbClient.updateDiscreteStatus(directory, HistoryStatus.FAILED);
@@ -86,10 +86,10 @@ export class Trigger {
         return;
       }
       const tfwFileName = readProp(filesGeoJson, "features[0].properties['File Name']") as string;
-      const tfwFilePath = await this.fileMapper.getFileFullPath(tfwFileName, 'tfw', relDir, isManual);
+      const tfwFilePath = await this.fileMapper.getFileFullPath(tfwFileName, 'tfw', rootDir, isManual);
       if (tfwFilePath === undefined) {
         if (isManual) {
-          await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);
+          await this.agentDbClient.updateDiscreteStatus(rootDir, HistoryStatus.FAILED);
           throw new BadRequestError(`${tfwFileName} tfw is missing`);
         }
         return;
@@ -104,19 +104,19 @@ export class Trigger {
       const ingestionData: IngestionParams = {
         fileNames: files,
         metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson, tfwFile),
-        originDirectory: relDir,
+        originDirectory: rootDir,
       };
       try {
         await this.overseerClient.ingestDiscreteLayer(ingestionData);
         await this.agentDbClient.updateDiscreteStatus(
-          relDir,
+          rootDir,
           HistoryStatus.TRIGGERED,
           ingestionData.metadata.productId,
           ingestionData.metadata.productVersion
         );
       } catch (err) {
         await this.agentDbClient.updateDiscreteStatus(
-          relDir,
+          rootDir,
           HistoryStatus.FAILED,
           ingestionData.metadata.productId,
           ingestionData.metadata.productVersion
@@ -126,7 +126,7 @@ export class Trigger {
         }
       }
     } else if (isManual) {
-      await this.agentDbClient.updateDiscreteStatus(relDir, HistoryStatus.FAILED);
+      await this.agentDbClient.updateDiscreteStatus(rootDir, HistoryStatus.FAILED);
       throw new BadRequestError('some of the required shape files are missing');
     }
   }

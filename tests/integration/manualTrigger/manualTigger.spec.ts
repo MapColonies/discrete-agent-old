@@ -45,38 +45,6 @@ describe('manualTrigger', function () {
       const calledTfw = readAllLinesMock.mock.calls[0][0] as string;
       expect(calledTfw.endsWith(expectedTfw)).toBe(true);
     });
-
-    it('should return 200 status code when triggered on layer Shapes dir', async function () {
-      initFs(fullFs);
-      axiosMock.post.mockResolvedValue({});
-      readAllLinesMock.mockResolvedValue(tfw);
-      const validRequest = {
-        sourceDirectory: 'testDir/Shapes',
-      };
-
-      const response = await requestSender.createLayer(validRequest);
-
-      expect(response.status).toBe(httpStatusCodes.OK);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const calledTfw = readAllLinesMock.mock.calls[0][0] as string;
-      expect(calledTfw.endsWith(expectedTfw)).toBe(true);
-    });
-
-    it('should return 200 status code when triggered on layer tiff dir', async function () {
-      initFs(fullFs);
-      axiosMock.post.mockResolvedValue({});
-      readAllLinesMock.mockResolvedValue(tfw);
-      const validRequest = {
-        sourceDirectory: 'testDir/tiff',
-      };
-
-      const response = await requestSender.createLayer(validRequest);
-
-      expect(response.status).toBe(httpStatusCodes.OK);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const calledTfw = readAllLinesMock.mock.calls[0][0] as string;
-      expect(calledTfw.endsWith(expectedTfw)).toBe(true);
-    });
   });
 
   describe('Bad Path', function () {
@@ -121,6 +89,32 @@ describe('manualTrigger', function () {
       fileExistsMock.mockResolvedValue(false);
       const validRequest = {
         sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 status code when triggered on layer Shapes dir', async function () {
+      initFs(fullFs);
+      axiosMock.post.mockResolvedValue({});
+      readAllLinesMock.mockResolvedValue(tfw);
+      const validRequest = {
+        sourceDirectory: 'testDir/Shapes',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 status code when triggered on layer tiff dir', async function () {
+      initFs(fullFs);
+      axiosMock.post.mockResolvedValue({});
+      readAllLinesMock.mockResolvedValue(tfw);
+      const validRequest = {
+        sourceDirectory: 'testDir/tiff',
       };
 
       const response = await requestSender.createLayer(validRequest);
