@@ -8,14 +8,19 @@ let fs: FsItem;
 // eslint-disable-next-line @typescript-eslint/ban-types
 function init(rawFs: object): void {
   fs = FsItem.generateFsFromObject(rawFs);
-  opendirMock.mockImplementation((path) => {
+  opendirMock.mockImplementation(async (path) => {
     const item = getFsItem(fs, path);
     // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    if (item !== undefined && item.isDirectory()) {
-      const entries = Object.values(item.content as Record<string, FsItem>);
-      return entries;
+    if (item !== undefined) {
+      if (item.isDirectory()) {
+        const entries = Object.values(item.content as Record<string, FsItem>);
+        return Promise.resolve(entries);
+      }
+      if (item.isFile()) {
+        return [item];
+      }
     }
-    return [];
+    return Promise.resolve([]);
   });
 }
 

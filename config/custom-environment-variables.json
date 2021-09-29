@@ -9,6 +9,10 @@
     "port": "SERVER_PORT"
   },
   "mountDir": "MOUNT_DIRECTORY",
+  "rootDirNestingLevel": {
+    "__name": "ROOT_DIR_NESTING_LEVEL",
+    "__format": "number"
+  },
   "watcher": {
     "watchDirectory": "WATCH_DIRECTORY",
     "watchOptions": {

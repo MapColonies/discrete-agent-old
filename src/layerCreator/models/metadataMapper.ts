@@ -41,7 +41,7 @@ export class MetadataMapper {
     productGeoJson: GeoJSON,
     metadataGeoJson: GeoJSON,
     filesGeoJson: GeoJSON,
-    tfwFile: string[],
+    tfwFile: string[]
   ): void {
     const metadata = (baseMetadata as unknown) as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
@@ -115,7 +115,7 @@ export class MetadataMapper {
       case TsTypes.BOOLEAN.value:
         return toBoolean(value);
       case TsTypes.DATE.value:
-        return moment.utc((value as string), 'DD/MM/YYYY').toDate();
+        return moment.utc(value as string, 'DD/MM/YYYY').toDate();
       case TsTypes.NUMBER.value:
         return toNumber(value);
       default:

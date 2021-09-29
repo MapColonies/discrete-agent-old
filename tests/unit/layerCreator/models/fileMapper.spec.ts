@@ -1,58 +1,17 @@
 import { normalize } from 'path';
 import { FileMapper } from '../../../../src/layerCreator/models/fileMapper';
+import { configMock, registerDefaultConfig } from '../../../mocks/config';
+import { dirWalkerMock, findFileMock } from '../../../mocks/dirWalker';
+import { loggerMock } from '../../../mocks/logger';
 
 describe('FileMapper', () => {
-  describe('stripSubDirs', () => {
-    it('remove layer sub directories from folder path with normal path', () => {
-      const fileMapper = new FileMapper();
-      const mapper = (fileMapper as unknown) as {
-        fileMappings: Record<string, unknown>;
-        generateStripSubDirsRegex: () => void;
-      };
-      mapper.fileMappings['test'] = {
-        pathPrefix: 'test',
-      };
-      mapper.generateStripSubDirsRegex();
-
-      // action
-      const cleanPath = fileMapper.stripSubDirs(normalize('a/test/b/test'));
-
-      // expectation
-      expect(cleanPath).toEqual(normalize('a/test/b'));
-    });
-
-    it('remove layer sub directories from folder path with nested path', () => {
-      const fileMapper = new FileMapper();
-      const mapper = (fileMapper as unknown) as {
-        fileMappings: Record<string, unknown>;
-        generateStripSubDirsRegex: () => void;
-      };
-      mapper.fileMappings['test'] = {
-        pathPrefix: 'b/test',
-      };
-      mapper.generateStripSubDirsRegex();
-
-      // action
-      const cleanPath = fileMapper.stripSubDirs(normalize('a/b/test/a/b/test'));
-
-      // expectation
-      expect(cleanPath).toEqual(normalize('a/b/test/a'));
-    });
-
-    it("don't change path when no sub dirs are present", () => {
-      const fileMapper = new FileMapper();
-      const path = normalize('a/test/b/test');
-      // action
-      const cleanPath = fileMapper.stripSubDirs(path);
-
-      // expectation
-      expect(cleanPath).toEqual(path);
-    });
+  beforeEach(() => {
+    registerDefaultConfig();
   });
 
   describe('getFilePath', () => {
     it('returns file name and extension when not mapped', () => {
-      const fileMapper = new FileMapper();
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
 
       // action
       const cleanPath = fileMapper.getFilePath('test', 'a');
@@ -62,10 +21,9 @@ describe('FileMapper', () => {
     });
 
     it('returns file path when mapped', () => {
-      const fileMapper = new FileMapper();
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
       const mappings = ((fileMapper as unknown) as { fileMappings: Record<string, unknown> }).fileMappings;
       mappings['test'] = {
-        pathPrefix: 'b/test',
         fileExtension: 'ext',
       };
 
@@ -73,7 +31,43 @@ describe('FileMapper', () => {
       const cleanPath = fileMapper.getFilePath('test', 'test');
 
       // expectation
-      expect(cleanPath).toEqual(normalize('b/test/test.ext'));
+      expect(cleanPath).toEqual('test.ext');
+    });
+  });
+
+  describe('getRootDir', () => {
+    it('returns discrete root path on manual trigger', () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+
+      const root = fileMapper.getRootDir('a/b/c', true);
+
+      expect(root.endsWith(normalize('/layerSources/a/b/c'))).toEqual(true);
+    });
+
+    it('returns discrete root path on auto trigger', () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+
+      const root = fileMapper.getRootDir('/layerSources/watch/a/b/c', false);
+
+      expect(root.endsWith(normalize('/layerSources/watch/a'))).toEqual(true);
+    });
+  });
+
+  describe('getFileFullPath', () => {
+    it('searches the correct file', async () => {
+      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+
+      await fileMapper.getFileFullPath('file', 'Tiff', '/layerSources/watch/a/b/c');
+
+      expect(findFileMock).toHaveBeenCalledTimes(1);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const root = findFileMock.mock.calls[0][0] as string;
+      expect(root.endsWith(normalize('/layerSources/watch/a'))).toEqual(true);
+
+      const expectedMatcher = process.platform === 'win32' ? /.*\\file\.tif/ : /.*\/file\.tif/;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(findFileMock.mock.calls[0][1]).toEqual(expectedMatcher);
     });
   });
 });
