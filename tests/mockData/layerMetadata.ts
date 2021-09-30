@@ -7,7 +7,7 @@ export const metadata = {
   rms: undefined,
   scale: undefined,
   producerName: undefined,
-  region: undefined,
+  region: 'c1,c2',
   classification: '4',
   creationDate: undefined,
   ingestionDate: undefined,
@@ -49,6 +49,8 @@ export const metadata = {
           Rms: null,
           SensorType: 'OTHER',
           Scale: null,
+          Countries: 'c1,c2',
+          Cities: 'p1,p2,p3',
         },
         geometry: {
           type: 'Polygon',

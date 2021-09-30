@@ -23,6 +23,7 @@ export class MetadataMapper {
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
     this.calculateClassification(metadata, metadataGeoJson);
+    this.parseRegion(metadata, metadataGeoJson);
     return metadata;
   }
 
@@ -43,7 +44,7 @@ export class MetadataMapper {
     filesGeoJson: GeoJSON,
     tfwFile: string[]
   ): void {
-    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
+    const metadata = baseMetadata as unknown as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
     sources[DataFileType.FILES] = filesGeoJson;
     sources[DataFileType.PRODUCT] = productGeoJson;
@@ -121,5 +122,24 @@ export class MetadataMapper {
       default:
         return value;
     }
+  }
+
+  private parseRegion(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const countriesSet = new Set<string>();
+    const features = (metadataGeoJson as FeatureCollection).features;
+    for (const feature of features) {
+      const props = feature.properties;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const featureCountriesStr = (props as { Countries: string | undefined | null }).Countries;
+      if (featureCountriesStr === undefined || featureCountriesStr === null || featureCountriesStr === '') {
+        continue;
+      }
+      const featureCountries = featureCountriesStr.split(',');
+      featureCountries.forEach((city) => {
+        countriesSet.add(city);
+      });
+    }
+    const countriesArr = Array.from(countriesSet);
+    metadata.region = countriesArr.join(',');
   }
 }

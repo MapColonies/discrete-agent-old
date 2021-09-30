@@ -6,10 +6,10 @@ const fileExistsMock = jest.fn();
 const readAsStringSyncMock = jest.fn();
 const openDirMock = opendirMock;
 
-const filesManagerMock = ({
+const filesManagerMock = {
   fileExists: fileExistsMock,
   readAllLines: readAllLinesMock,
   readAsStringSync: readAsStringSyncMock,
   openDir: openDirMock,
-} as unknown) as FilesManager;
+} as unknown as FilesManager;
 export { fileExistsMock, readAllLinesMock, readAsStringSyncMock, openDirMock, filesManagerMock };

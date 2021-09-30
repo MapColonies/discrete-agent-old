@@ -20,7 +20,7 @@ describe('watchStatus', function () {
     watcher = container.resolve(Watcher);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     (watcher as any).internalStartWatch = internalStartWatchMock;
-    watcherStatus = (watcher as unknown) as { watching: boolean };
+    watcherStatus = watcher as unknown as { watching: boolean };
     requestSender.init();
   });
 

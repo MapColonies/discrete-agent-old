@@ -12,7 +12,9 @@
         "Ep90": "1",
         "Rms": null,
         "SensorType": "OTHER",
-        "Scale": null
+        "Scale": null,
+        "Countries": "c1,c2",
+        "Cities": "p1,p2,p3"
       },
       "geometry": {
         "type": "Polygon",

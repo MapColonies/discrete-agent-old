@@ -4,10 +4,10 @@ import { IConfig } from '../../src/common/interfaces';
 const getMock = jest.fn();
 const hasMock = jest.fn();
 
-const configMock = ({
+const configMock = {
   get: getMock,
   has: hasMock,
-} as unknown) as IConfig;
+} as unknown as IConfig;
 
 const setConfigValues = (values: Record<string, unknown>): void => {
   getMock.mockImplementation((key: string) => {
