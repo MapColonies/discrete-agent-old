@@ -45,7 +45,7 @@ export const ingestionParams = {
     updateDate: '2019-04-06T00:00:00.000Z',
     sourceDateEnd: '2019-04-06T00:00:00.000Z',
     sourceDateStart: '2019-04-06T00:00:00.000Z',
-    region: undefined,
+    region: 'c1,c2',
     ingestionDate: undefined,
     srsId: undefined,
     srsName: undefined,
@@ -65,6 +65,8 @@ export const ingestionParams = {
             Rms: null,
             SensorType: 'OTHER',
             Scale: null,
+            Countries: 'c1,c2',
+            Cities: 'p1,p2,p3',
           },
           geometry: {
             type: 'Polygon',

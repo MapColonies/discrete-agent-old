@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { GeoJSON } from 'geojson';
+import { FeatureCollection, GeoJSON } from 'geojson';
+import { cloneDeep } from 'lodash';
 import { LayerMetadata } from '@map-colonies/mc-model-types';
 import { MetadataMapper } from '../../../../src/layerCreator/models/metadataMapper';
 import { fileMapperMock } from '../../../mocks/fileMapper';
@@ -32,6 +33,20 @@ describe('metadataMapper', () => {
 
       // expectation
       expect(metadata).toEqual(expectedMetadata);
+    });
+
+    it('mapped region dont have duplicates with mutiple poligon parts', () => {
+      const srcMetadata = cloneDeep(metadataGeoJson) as FeatureCollection;
+      srcMetadata.features.push(srcMetadata.features[0]);
+
+      const destMetadata = cloneDeep(expectedMetadata);
+      const expectedPolygonParts = destMetadata.layerPolygonParts as FeatureCollection;
+      expectedPolygonParts.features.push(expectedPolygonParts.features[0]);
+      // action
+      const metadata = metadataMapper.map(productGeoJson, srcMetadata, filesGeoJson, tfw);
+
+      // expectation
+      expect(metadata).toEqual(destMetadata);
     });
   });
 });
