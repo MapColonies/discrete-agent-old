@@ -44,7 +44,7 @@ export class MetadataMapper {
     filesGeoJson: GeoJSON,
     tfwFile: string[]
   ): void {
-    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
+    const metadata = baseMetadata as unknown as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
     sources[DataFileType.FILES] = filesGeoJson;
     sources[DataFileType.PRODUCT] = productGeoJson;

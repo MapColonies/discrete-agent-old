@@ -2,8 +2,8 @@ import { Classifier } from '../../src/layerCreator/models/classifier';
 
 const getClassificationMock = jest.fn();
 
-const classifierMock = ({
+const classifierMock = {
   getClassification: getClassificationMock,
-} as unknown) as Classifier;
+} as unknown as Classifier;
 
 export { classifierMock, getClassificationMock };

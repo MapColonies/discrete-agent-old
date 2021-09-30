@@ -6,12 +6,12 @@ const infoMock = jest.fn();
 const debugMock = jest.fn();
 const logMock = jest.fn();
 
-const loggerMock = ({
+const loggerMock = {
   error: errorMock,
   warn: warnMock,
   info: infoMock,
   debug: debugMock,
   log: logMock,
-} as unknown) as MCLogger;
+} as unknown as MCLogger;
 
 export { loggerMock, errorMock, warnMock, infoMock, debugMock, logMock };

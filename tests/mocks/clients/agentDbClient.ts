@@ -6,13 +6,13 @@ const updateDiscreteStatusMock = jest.fn();
 const getWatchStatusMock = jest.fn();
 const setWatchStatusMock = jest.fn();
 
-const agentDbClientMock = ({
+const agentDbClientMock = {
   getDiscreteStatus: getDiscreteStatusMock,
   createDiscreteStatus: createDiscreteStatusMock,
   updateDiscreteStatus: updateDiscreteStatusMock,
   getWatchStatus: getWatchStatusMock,
   setWatchStatus: setWatchStatusMock,
-} as unknown) as AgentDbClient;
+} as unknown as AgentDbClient;
 
 const init = (): void => {
   getWatchStatusMock.mockResolvedValue({ isWatching: false });

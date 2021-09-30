@@ -22,7 +22,7 @@ describe('FileMapper', () => {
 
     it('returns file path when mapped', () => {
       const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
-      const mappings = ((fileMapper as unknown) as { fileMappings: Record<string, unknown> }).fileMappings;
+      const mappings = (fileMapper as unknown as { fileMappings: Record<string, unknown> }).fileMappings;
       mappings['test'] = {
         fileExtension: 'ext',
       };
