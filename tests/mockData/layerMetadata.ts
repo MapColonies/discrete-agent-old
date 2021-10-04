@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 export const metadata = {
   resolution: 0.0000018519,
+  maxResolutionMeter: 0.2,
   accuracyCE90: 1,
   sensorType: ['OTHER'],
   rms: undefined,

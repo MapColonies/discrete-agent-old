@@ -35,7 +35,7 @@ describe('metadataMapper', () => {
       expect(metadata).toEqual(expectedMetadata);
     });
 
-    it('mapped region dont have duplicates with mutiple poligon parts', () => {
+    it('mapped region dont have duplicates with multiple polygon parts', () => {
       const srcMetadata = cloneDeep(metadataGeoJson) as FeatureCollection;
       srcMetadata.features.push(srcMetadata.features[0]);
 
@@ -63,7 +63,7 @@ function loadTestData() {
   filesGeoJson = JSON.parse(filesStr) as unknown as GeoJSON;
   productGeoJson = JSON.parse(productStr) as unknown as GeoJSON;
   metadataGeoJson = JSON.parse(geoJsonMetadataStr) as unknown as GeoJSON;
-  expectedMetadata = { ...testExpectedMetadata } as unknown as LayerMetadata;
+  expectedMetadata = { ...testExpectedMetadata, rawProductData: productGeoJson } as unknown as LayerMetadata;
   expectedMetadata.updateDate = new Date(expectedMetadata.updateDate as unknown as string);
   expectedMetadata.sourceDateStart = new Date(expectedMetadata.sourceDateStart as unknown as string);
   expectedMetadata.sourceDateEnd = new Date(expectedMetadata.sourceDateEnd as unknown as string);

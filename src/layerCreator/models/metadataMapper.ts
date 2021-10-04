@@ -18,12 +18,16 @@ export class MetadataMapper {
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
     const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
+
     this.parseIdentifiers(metadata, metadataGeoJson);
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
     this.calculateClassification(metadata, metadataGeoJson);
     this.parseRegion(metadata, metadataGeoJson);
+
+    this.parseRawProductData(metadata, productGeoJson);
+
     return metadata;
   }
 
@@ -141,5 +145,9 @@ export class MetadataMapper {
     }
     const countriesArr = Array.from(countriesSet);
     metadata.region = countriesArr.join(',');
+  }
+
+  private parseRawProductData(metadata: LayerMetadata, productGeoJson: GeoJSON): void {
+    metadata.rawProductData = productGeoJson;
   }
 }

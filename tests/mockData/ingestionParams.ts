@@ -18,6 +18,7 @@ export const ingestionParams = {
   ],
   metadata: {
     resolution: 0.0000018519,
+    maxResolutionMeter: 0.2,
     accuracyCE90: 1,
     classification: '4',
     creationDate: undefined,
