@@ -48,7 +48,7 @@ export class MetadataMapper {
     filesGeoJson: GeoJSON,
     tfwFile: string[]
   ): void {
-    const metadata = baseMetadata as unknown as Record<string, unknown>;
+    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
     sources[DataFileType.FILES] = filesGeoJson;
     sources[DataFileType.PRODUCT] = productGeoJson;
@@ -66,6 +66,7 @@ export class MetadataMapper {
     const parts = source.split('-');
     metadata.productId = parts[0];
     metadata.productVersion = parts[1];
+    metadata.productName = metadata.productName?.replace('_w84geo', '').replace('_Tiff', '');
   }
 
   private parseSourceDates(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
