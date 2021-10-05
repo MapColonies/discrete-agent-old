@@ -159,6 +159,7 @@ describe('trigger', () => {
       fileExistsMock.mockResolvedValue(true);
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      getRootDirMock.mockReturnValue('/mountDir/test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -173,7 +174,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('/mountDir/test', true);
+      await trigger.trigger('test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -193,6 +194,7 @@ describe('trigger', () => {
       fileExistsMock.mockResolvedValue(true);
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      getRootDirMock.mockReturnValue('/mountDir/test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -207,7 +209,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('/mountDir/test', true);
+      await trigger.trigger('/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -221,6 +223,7 @@ describe('trigger', () => {
       isQueueEmptyMock.mockReturnValue(true);
       parseMock.mockRejectedValue(new Error('tests'));
       findFilesRelativePathsMock.mockResolvedValue(shpFiles);
+      getRootDirMock.mockReturnValue('/mountDir/test');
 
       configData['watcher.shpRetry'] = {
         retries: 4,
@@ -244,7 +247,7 @@ describe('trigger', () => {
 
       // action
       const action = async () => {
-        await trigger.trigger('/mountDir/test');
+        await trigger.trigger('test');
       };
 
       // expectation
@@ -255,9 +258,9 @@ describe('trigger', () => {
 });
 
 function loadTestMetadata(): LayerMetadata {
-  return { ...metadata } as unknown as LayerMetadata;
+  return ({ ...metadata } as unknown) as LayerMetadata;
 }
 
 function loadTestIngestionParams(): LayerMetadata {
-  return { ...ingestionParams } as unknown as LayerMetadata;
+  return ({ ...ingestionParams } as unknown) as LayerMetadata;
 }

@@ -1,3 +1,4 @@
+import { join } from 'path';
 import { inject, injectable } from 'tsyringe';
 import { GeoJSON } from 'geojson';
 import retry from 'async-retry';
@@ -58,17 +59,17 @@ export class Trigger {
       let filesShp!: string, filesDbf!: string, productShp!: string, productDbf!: string, metadataShp!: string, metadataDbf!: string;
       for (const path of shpFilesPaths) {
         if (path.endsWith(this.shpFiles[0])) {
-          filesShp = path;
+          filesShp = join(rootDir, path);
         } else if (path.endsWith(this.shpFiles[1])) {
-          filesDbf = path;
+          filesDbf = join(rootDir, path);
         } else if (path.endsWith(this.shpFiles[2])) {
-          productShp = path;
+          productShp = join(rootDir, path);
         } else if (path.endsWith(this.shpFiles[3])) {
-          productDbf = path;
+          productDbf = join(rootDir, path);
         } else if (path.endsWith(this.shpFiles[4])) {
-          metadataShp = path;
+          metadataShp = join(rootDir, path);
         } else if (path.endsWith(this.shpFiles[5])) {
-          metadataDbf = path;
+          metadataDbf = join(rootDir, path);
         }
       }
       //read file list
