@@ -66,7 +66,7 @@ export class MetadataMapper {
     const parts = source.split('-');
     metadata.productId = parts[0];
     metadata.productVersion = parts[1];
-    metadata.productName = metadata.productName?.replace('_w84geo', '').replace('_Tiff', '');
+    metadata.productName = metadata.productName?.replace(/_w84geo/g, '').replace(/_Tiff/g, '');
   }
 
   private parseSourceDates(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
