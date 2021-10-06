@@ -48,14 +48,19 @@ export class FileMapper {
       return resolve(this.mountDir, path);
     }
     const baseDir = this.watchDir;
-    let relPath = relative(baseDir, path);
+    const relPath = this.cleanRelativePath(baseDir, path);
+    const relBaseDir = this.stripSubDirs(relPath);
+    const rootDir = resolve(baseDir, relBaseDir);
+    return rootDir;
+  }
+
+  public cleanRelativePath(from: string, to: string): string {
+    let relPath = relative(from, to);
     if (relPath.startsWith('.')) {
       const pointAndSeparatorLength = 2;
       relPath = relPath.slice(pointAndSeparatorLength, undefined);
     }
-    const relBaseDir = this.stripSubDirs(relPath);
-    const rootDir = resolve(baseDir, relBaseDir);
-    return rootDir;
+    return relPath;
   }
 
   public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string, isManual = false): Promise<string | undefined> {
