@@ -48,7 +48,7 @@ export class MetadataMapper {
     filesGeoJson: GeoJSON,
     tfwFile: string[]
   ): void {
-    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
+    const metadata = baseMetadata as unknown as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
     sources[DataFileType.FILES] = filesGeoJson;
     sources[DataFileType.PRODUCT] = productGeoJson;
@@ -90,13 +90,16 @@ export class MetadataMapper {
   }
 
   private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
-    const features = (metadataGeoJson as FeatureCollection).features;
-    const types = new Set<SensorType>();
-    features.forEach((feature) => {
-      const sensor = readProp(feature, 'properties.SensorType') as SensorType;
-      types.add(sensor);
-    });
-    metadata.sensorType = Array.from(types);
+    // const features = (metadataGeoJson as FeatureCollection).features;
+    // const types = new Set<SensorType>();
+    // features.forEach((feature) => {
+    //   const sensor = readProp(feature, 'properties.SensorType') as SensorType;
+    //   types.add(sensor);
+    // });
+    // metadata.sensorType = Array.from(types);
+
+    //temporary set sensor type to always be undefined
+    metadata.sensorType = [SensorType.UNDEFINED];
   }
 
   private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
