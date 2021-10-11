@@ -37,7 +37,7 @@ describe('watcher', () => {
 
   describe('#startWatching', () => {
     it('update db watch status and start polling', async function () {
-      const watcherStatus = (watcher as unknown) as { watching: boolean };
+      const watcherStatus = watcher as unknown as { watching: boolean };
       watcherStatus.watching = false;
 
       await watcher.startWatching();
@@ -53,7 +53,7 @@ describe('watcher', () => {
 
   describe('#stopWatching', () => {
     it('update db watch status', async function () {
-      const watcherStatus = (watcher as unknown) as { watching: boolean };
+      const watcherStatus = watcher as unknown as { watching: boolean };
       watcherStatus.watching = true;
 
       await watcher.stopWatching();

@@ -9,7 +9,14 @@ import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 import { configMock, getMock } from '../../../mocks/config';
-import { fileMapperMock, getFilePathMock, getRootDirMock, findFilesRelativePathsMock, getFileFullPathMock } from '../../../mocks/fileMapper';
+import {
+  fileMapperMock,
+  getFilePathMock,
+  getRootDirMock,
+  findFilesRelativePathsMock,
+  getFileFullPathMock,
+  cleanRelativePathMock,
+} from '../../../mocks/fileMapper';
 import { tfw } from '../../../mockData/tfw';
 import { metadata } from '../../../mockData/layerMetadata';
 import { ingestionParams } from '../../../mockData/ingestionParams';
@@ -67,9 +74,10 @@ describe('trigger', () => {
       parseFilesShpJsonMock.mockReturnValue(fileList);
       mapMock.mockReturnValue(expectedMetadata);
       fileExistsMock.mockResolvedValue(true);
-      getRootDirMock.mockReturnValue('test');
+      getRootDirMock.mockReturnValue('/layerSources/test');
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(fileList);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      cleanRelativePathMock.mockReturnValueOnce('test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -195,6 +203,7 @@ describe('trigger', () => {
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
       getRootDirMock.mockReturnValue('/mountDir/test');
+      cleanRelativePathMock.mockResolvedValue('test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -258,9 +267,9 @@ describe('trigger', () => {
 });
 
 function loadTestMetadata(): LayerMetadata {
-  return ({ ...metadata } as unknown) as LayerMetadata;
+  return { ...metadata } as unknown as LayerMetadata;
 }
 
 function loadTestIngestionParams(): LayerMetadata {
-  return ({ ...ingestionParams } as unknown) as LayerMetadata;
+  return { ...ingestionParams } as unknown as LayerMetadata;
 }
