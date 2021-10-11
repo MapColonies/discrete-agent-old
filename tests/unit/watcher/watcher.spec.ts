@@ -23,7 +23,7 @@ describe('watcher', () => {
     };
     initDb();
     getMock.mockImplementation((key: string) => configData[key]);
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     watcher = new Watcher(configMock, loggerMock, agentDbClientMock, triggerMock, lockMock, dirWalkerMock);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     (watcher as any).opendir = opendirMock;

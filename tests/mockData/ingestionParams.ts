@@ -18,10 +18,11 @@ export const ingestionParams = {
   ],
   metadata: {
     resolution: 0.0000018519,
+    maxResolutionMeter: 0.2,
     accuracyCE90: 1,
     classification: '4',
     creationDate: undefined,
-    sensorType: ['OTHER'],
+    sensorType: ['UNDEFINED'],
     rms: undefined,
     scale: undefined,
     description: 'description',
@@ -84,5 +85,7 @@ export const ingestionParams = {
       ],
       bbox: [34.8444933529867, 32.0425133190045, 34.8851821360093, 32.0786811260038],
     },
+    includedInBests: undefined,
+    productBoundingBox: undefined,
   },
 };

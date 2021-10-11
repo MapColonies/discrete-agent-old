@@ -18,12 +18,16 @@ export class MetadataMapper {
   public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
     const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
+
     this.parseIdentifiers(metadata, metadataGeoJson);
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
     this.calculateClassification(metadata, metadataGeoJson);
     this.parseRegion(metadata, metadataGeoJson);
+
+    this.parseRawProductData(metadata, productGeoJson);
+
     return metadata;
   }
 
@@ -62,6 +66,7 @@ export class MetadataMapper {
     const parts = source.split('-');
     metadata.productId = parts[0];
     metadata.productVersion = parts[1];
+    metadata.productName = metadata.productName?.replace(/_w84geo/g, '').replace(/_Tiff/g, '');
   }
 
   private parseSourceDates(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
@@ -85,13 +90,16 @@ export class MetadataMapper {
   }
 
   private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
-    const features = (metadataGeoJson as FeatureCollection).features;
-    const types = new Set<SensorType>();
-    features.forEach((feature) => {
-      const sensor = readProp(feature, 'properties.SensorType') as SensorType;
-      types.add(sensor);
-    });
-    metadata.sensorType = Array.from(types);
+    // const features = (metadataGeoJson as FeatureCollection).features;
+    // const types = new Set<SensorType>();
+    // features.forEach((feature) => {
+    //   const sensor = readProp(feature, 'properties.SensorType') as SensorType;
+    //   types.add(sensor);
+    // });
+    // metadata.sensorType = Array.from(types);
+
+    //temporary set sensor type to always be undefined
+    metadata.sensorType = [SensorType.UNDEFINED];
   }
 
   private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
@@ -141,5 +149,9 @@ export class MetadataMapper {
     }
     const countriesArr = Array.from(countriesSet);
     metadata.region = countriesArr.join(',');
+  }
+
+  private parseRawProductData(metadata: LayerMetadata, productGeoJson: GeoJSON): void {
+    metadata.rawProductData = productGeoJson;
   }
 }

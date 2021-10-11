@@ -9,7 +9,14 @@ import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
 import { configMock, getMock } from '../../../mocks/config';
-import { fileMapperMock, getFilePathMock, getRootDirMock, findFilesRelativePathsMock, getFileFullPathMock } from '../../../mocks/fileMapper';
+import {
+  fileMapperMock,
+  getFilePathMock,
+  getRootDirMock,
+  findFilesRelativePathsMock,
+  getFileFullPathMock,
+  cleanRelativePathMock,
+} from '../../../mocks/fileMapper';
 import { tfw } from '../../../mockData/tfw';
 import { metadata } from '../../../mockData/layerMetadata';
 import { ingestionParams } from '../../../mockData/ingestionParams';
@@ -67,9 +74,10 @@ describe('trigger', () => {
       parseFilesShpJsonMock.mockReturnValue(fileList);
       mapMock.mockReturnValue(expectedMetadata);
       fileExistsMock.mockResolvedValue(true);
-      getRootDirMock.mockReturnValue('test');
+      getRootDirMock.mockReturnValue('/layerSources/test');
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(fileList);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      cleanRelativePathMock.mockReturnValueOnce('test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -159,6 +167,7 @@ describe('trigger', () => {
       fileExistsMock.mockResolvedValue(true);
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      getRootDirMock.mockReturnValue('/mountDir/test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -173,7 +182,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('/mountDir/test', true);
+      await trigger.trigger('test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -193,6 +202,8 @@ describe('trigger', () => {
       fileExistsMock.mockResolvedValue(true);
       findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
       getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      getRootDirMock.mockReturnValue('/mountDir/test');
+      cleanRelativePathMock.mockResolvedValue('test');
 
       const trigger = new Trigger(
         shpParserMock,
@@ -207,7 +218,7 @@ describe('trigger', () => {
       );
 
       // action
-      await trigger.trigger('/mountDir/test', true);
+      await trigger.trigger('/test', true);
 
       // expectation
       expect(getDiscreteStatusMock).toHaveBeenCalledTimes(1);
@@ -221,6 +232,7 @@ describe('trigger', () => {
       isQueueEmptyMock.mockReturnValue(true);
       parseMock.mockRejectedValue(new Error('tests'));
       findFilesRelativePathsMock.mockResolvedValue(shpFiles);
+      getRootDirMock.mockReturnValue('/mountDir/test');
 
       configData['watcher.shpRetry'] = {
         retries: 4,
@@ -244,7 +256,7 @@ describe('trigger', () => {
 
       // action
       const action = async () => {
-        await trigger.trigger('/mountDir/test');
+        await trigger.trigger('test');
       };
 
       // expectation
