@@ -64,7 +64,7 @@ export class MetadataMapper {
   private parseIdentifiers(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
     const source = readProp(metadataGeoJson, 'features[0].properties.Source') as string;
     const parts = source.split('-');
-    metadata.productId = parts[0];
+    metadata.productId = parts[0].replace('v', '');
     metadata.productVersion = parts[1];
     metadata.productName = metadata.productName?.replace(/_w84geo/g, '').replace(/_Tiff/g, '');
   }

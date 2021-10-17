@@ -21,7 +21,7 @@ describe('classifier', () => {
 
   describe('getClassification', () => {
     it('high res fully in bounds returns configured classification', () => {
-      const res = 0.08;
+      const res = 0.008;
       const polygon = [
         [
           [0.01, 0.01],
@@ -40,7 +40,7 @@ describe('classifier', () => {
     });
 
     it('med res fully in bounds returns configured classification', () => {
-      const res = 0.4;
+      const res = 0.04;
       const polygon = [
         [
           [0, 0],
@@ -59,7 +59,7 @@ describe('classifier', () => {
     });
 
     it('med res fully out of bounds returns configured classification', () => {
-      const res = 0.4;
+      const res = 0.04;
       const polygon = [
         [
           [2, 2],
@@ -78,7 +78,7 @@ describe('classifier', () => {
     });
 
     it('med res partial cover of inner area (more then configured) returns configured classification', () => {
-      const res = 0.4;
+      const res = 0.04;
       const polygon = [
         [
           [-0.1, -0.1],
@@ -97,7 +97,7 @@ describe('classifier', () => {
     });
 
     it('med res partial covered (less then configured) returns configured classification', () => {
-      const res = 0.4;
+      const res = 0.04;
       const polygon = [
         [
           [-0.1, -0.1],
@@ -116,7 +116,7 @@ describe('classifier', () => {
     });
 
     it('low res in bounds returns default classification', () => {
-      const res = 0.5;
+      const res = 0.05;
       const polygon = [
         [
           [0, 0],
