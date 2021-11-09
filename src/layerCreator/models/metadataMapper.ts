@@ -86,7 +86,7 @@ export class MetadataMapper {
     }
     metadata.sourceDateStart = minDate;
     metadata.sourceDateEnd = maxDate;
-    metadata.updateDate = maxDate;
+    metadata.updateDate = new Date();
   }
 
   private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
