@@ -13,6 +13,7 @@ let filesGeoJson: GeoJSON;
 let productGeoJson: GeoJSON;
 let metadataGeoJson: GeoJSON;
 let expectedMetadata: LayerMetadata;
+const nowDate = new Date('2019-04-06T00:00:00.000Z');
 
 describe('metadataMapper', () => {
   let metadataMapper: MetadataMapper;
@@ -23,7 +24,14 @@ describe('metadataMapper', () => {
 
   beforeEach(() => {
     getClassificationMock.mockReturnValue(4);
+    jest.useFakeTimers().setSystemTime(nowDate);
     metadataMapper = new MetadataMapper(fileMapperMock, classifierMock);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.resetAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('map', () => {
