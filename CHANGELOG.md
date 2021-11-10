@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/MapColonies/discrete-agent/compare/v1.4.0...v1.5.0) (2021-11-10)
+
+
+### Features
+
+* change updateDate field mapping to now ([#81](https://github.com/MapColonies/discrete-agent/issues/81)) ([79f3e2c](https://github.com/MapColonies/discrete-agent/commit/79f3e2c26358c2cb51fb82e7a3d60e46746b9525))
+
 ## [1.4.0](https://github.com/MapColonies/discrete-agent/compare/v1.3.0...v1.4.0) (2021-10-17)
 
 
