@@ -23,7 +23,7 @@ export class MetadataMapper {
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
-    this.calculateClassification(metadata, metadataGeoJson);
+    this.calculateClassification(metadata);
     this.parseRegion(metadata, metadataGeoJson);
 
     this.parseRawProductData(metadata, productGeoJson);
@@ -106,14 +106,10 @@ export class MetadataMapper {
     metadata.layerPolygonParts = metadataGeoJson;
   }
 
-  private calculateClassification(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
-    const features = (metadataGeoJson as FeatureCollection).features;
-    const props = features[0].properties;
-    const coords = (features[0].geometry as Polygon).coordinates;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const resolutionStr = (props as { Resolution: string }).Resolution;
-    const resolution = toNumber(resolutionStr);
-    metadata.classification = this.classifier.getClassification(resolution, coords).toString();
+  private calculateClassification(metadata: LayerMetadata): void {
+    const resolutionMeter = metadata.maxResolutionMeter as number;
+    const coordinates = (metadata.footprint as Polygon).coordinates;
+    metadata.classification = this.classifier.getClassification(resolutionMeter, coordinates).toString();
   }
 
   private castValue(value: unknown, type: string): unknown {
