@@ -1,3 +1,5 @@
+import { mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
@@ -9,8 +11,6 @@ import { IConfig, ILogger } from './common/interfaces';
 import { manualTriggerRouterFactory } from './manualTrigger/routes/manualTriggerRouter';
 import { watchStatusRouterFactory } from './watchStatus/routes/watchStatusRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
-import { mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
 
 @injectable()
 export class ServerBuilder {
@@ -57,13 +57,14 @@ export class ServerBuilder {
     try {
       const mountDir = this.config.get<string>('mountDir');
       const watchDir = this.config.get<string>('watcher.watchDirectory');
-      const relativeWatchDirPath = join(mountDir, watchDir)
+      const relativeWatchDirPath = join(mountDir, watchDir);
       if (!existsSync(relativeWatchDirPath)) {
         this.logger.log('info', `watch directory: '${watchDir}' is not exists, creating in path: ${relativeWatchDirPath}.`);
         mkdirSync(relativeWatchDirPath);
       }
     } catch (error) {
-      this.logger.log('error', `error occured while creating watch directory: ${error}`)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      this.logger.log('error', `error occured while creating watch directory: ${error}`);
       throw error;
     }
   }
