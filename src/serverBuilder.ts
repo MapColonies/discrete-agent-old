@@ -9,6 +9,8 @@ import { IConfig, ILogger } from './common/interfaces';
 import { manualTriggerRouterFactory } from './manualTrigger/routes/manualTriggerRouter';
 import { watchStatusRouterFactory } from './watchStatus/routes/watchStatusRouter';
 import { openapiRouterFactory } from './common/routes/openapi';
+import { mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 
 @injectable()
 export class ServerBuilder {
@@ -26,6 +28,7 @@ export class ServerBuilder {
     this.registerPreRoutesMiddleware();
     this.buildRoutes();
     this.registerPostRoutesMiddleware();
+    this.createWatchDirectory();
 
     return this.serverInstance;
   }
@@ -48,5 +51,20 @@ export class ServerBuilder {
 
   private registerPostRoutesMiddleware(): void {
     this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.log('error', message)));
+  }
+
+  private createWatchDirectory(): void {
+    try {
+      const mountDir = this.config.get<string>('mountDir');
+      const watchDir = this.config.get<string>('watcher.watchDirectory');
+      const relativeWatchDirPath = join(mountDir, watchDir)
+      if (!existsSync(relativeWatchDirPath)) {
+        this.logger.log('info', `watch directory: '${watchDir}' is not exists, creating in path: ${relativeWatchDirPath}.`);
+        mkdirSync(relativeWatchDirPath);
+      }
+    } catch (error) {
+      this.logger.log('error', `error occured while creating watch directory: ${error}`)
+      throw error;
+    }
   }
 }
