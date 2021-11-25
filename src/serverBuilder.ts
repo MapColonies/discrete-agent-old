@@ -61,7 +61,7 @@ export class ServerBuilder {
       }
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      this.logger.log('error', `error occured while creating watch directory: ${error}`);
+      this.logger.log('error', `error occured while creating watch directory: '${this.realativeWatchDir}': ${error}`);
       throw error;
     }
   }
