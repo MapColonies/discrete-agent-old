@@ -1,3 +1,4 @@
+import fs from 'fs';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
@@ -9,7 +10,7 @@ import * as requestSender from './helpers/requestSender';
 interface StatusResponse {
   isWatching: boolean;
 }
-
+let mkdirSyncSpy: jest.SpyInstance;
 describe('watchStatus', function () {
   const internalStartWatchMock = jest.fn();
   let watcherStatus: { watching: boolean };
@@ -17,6 +18,8 @@ describe('watchStatus', function () {
 
   beforeAll(function () {
     registerTestValues();
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync');
+    mkdirSyncSpy.mockImplementation(() => undefined);
     watcher = container.resolve(Watcher);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     (watcher as any).internalStartWatch = internalStartWatchMock;

@@ -1,5 +1,4 @@
 import { mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
@@ -19,7 +18,8 @@ export class ServerBuilder {
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
     private readonly requestLogger: RequestLogger,
-    @inject(Services.LOGGER) private readonly logger: ILogger
+    @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.WATCHER_CONFIG) private readonly realativeWatchDir: string
   ) {
     this.serverInstance = express();
   }
@@ -55,12 +55,9 @@ export class ServerBuilder {
 
   private createWatchDirectory(): void {
     try {
-      const mountDir = this.config.get<string>('mountDir');
-      const watchDir = this.config.get<string>('watcher.watchDirectory');
-      const relativeWatchDirPath = join(mountDir, watchDir);
-      if (!existsSync(relativeWatchDirPath)) {
-        this.logger.log('info', `watch directory: '${watchDir}' is not exists, creating in path: ${relativeWatchDirPath}.`);
-        mkdirSync(relativeWatchDirPath);
+      if (!existsSync(this.realativeWatchDir)) {
+        this.logger.log('info', `watch directory is not exists, creating in path: ${this.realativeWatchDir}.`);
+        mkdirSync(this.realativeWatchDir);
       }
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

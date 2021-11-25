@@ -12,7 +12,6 @@ type FileMappings = Record<string, IFileMapping | undefined>;
 
 @singleton()
 export class FileMapper {
-  private readonly watchDir: string;
   private readonly mountDir: string;
   private readonly fileMappings: FileMappings = {
     shp: {
@@ -35,11 +34,11 @@ export class FileMapper {
   public constructor(
     @inject(Services.CONFIG) config: IConfig,
     @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.WATCHER_CONFIG) private readonly realativeWatchDir: string,
     private readonly dirWalker: DirWalker
   ) {
     this.generateRegexPatterns();
     this.mountDir = config.get('mountDir');
-    this.watchDir = join(this.mountDir, config.get('watcher.watchDirectory'));
     this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
@@ -47,7 +46,7 @@ export class FileMapper {
     if (isManual) {
       return resolve(this.mountDir, path);
     }
-    const baseDir = this.watchDir;
+    const baseDir = this.realativeWatchDir;
     const relPath = this.cleanRelativePath(baseDir, path);
     const relBaseDir = this.stripSubDirs(relPath);
     const rootDir = resolve(baseDir, relBaseDir);
