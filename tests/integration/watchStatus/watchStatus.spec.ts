@@ -5,6 +5,7 @@ import { registerTestValues } from '../testContainerConfig';
 import { getWatchStatusMock, setWatchStatusMock } from '../../mocks/clients/agentDbClient';
 import { Watcher } from '../../../src/watcher/watcher';
 import { registerDefaultConfig } from '../../mocks/config';
+import { directoryExistsMock } from '../../mocks/filesManager';
 import * as requestSender from './helpers/requestSender';
 
 interface StatusResponse {
@@ -32,6 +33,7 @@ describe('watchStatus', function () {
       watcherStatus.watching = true;
     });
     registerDefaultConfig();
+    directoryExistsMock.mockReturnValue(true);
   });
 
   afterEach(function () {
