@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/MapColonies/discrete-agent/compare/v1.5.0...v1.5.1) (2021-11-28)
+
+
+### Bug Fixes
+
+* fix classification check to use resolution in meter field ([#82](https://github.com/MapColonies/discrete-agent/issues/82)) ([cf1ca89](https://github.com/MapColonies/discrete-agent/commit/cf1ca89e765658005e8690cb0c8f77e6159b98a0))
+* return 404 response on invalid directory ([#84](https://github.com/MapColonies/discrete-agent/issues/84)) ([bf6b614](https://github.com/MapColonies/discrete-agent/commit/bf6b6142d22980ddca4c8c88899ce2ca702d8026))
+
 ## [1.5.0](https://github.com/MapColonies/discrete-agent/compare/v1.4.0...v1.5.0) (2021-11-10)
 
 
