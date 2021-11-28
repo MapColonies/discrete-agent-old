@@ -5,13 +5,14 @@ import { dirWalkerMock, findFileMock } from '../../../mocks/dirWalker';
 import { loggerMock } from '../../../mocks/logger';
 
 describe('FileMapper', () => {
+  const watchDirMock = '/layerSources/watch';
   beforeEach(() => {
     registerDefaultConfig();
   });
 
   describe('getFilePath', () => {
     it('returns file name and extension when not mapped', () => {
-      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+      const fileMapper = new FileMapper(configMock, loggerMock, watchDirMock, dirWalkerMock);
 
       // action
       const cleanPath = fileMapper.getFilePath('test', 'a');
@@ -21,7 +22,7 @@ describe('FileMapper', () => {
     });
 
     it('returns file path when mapped', () => {
-      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+      const fileMapper = new FileMapper(configMock, loggerMock, watchDirMock, dirWalkerMock);
       const mappings = (fileMapper as unknown as { fileMappings: Record<string, unknown> }).fileMappings;
       mappings['test'] = {
         fileExtension: 'ext',
@@ -37,7 +38,7 @@ describe('FileMapper', () => {
 
   describe('getRootDir', () => {
     it('returns discrete root path on manual trigger', () => {
-      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+      const fileMapper = new FileMapper(configMock, loggerMock, watchDirMock, dirWalkerMock);
 
       const root = fileMapper.getRootDir('a/b/c', true);
 
@@ -45,7 +46,7 @@ describe('FileMapper', () => {
     });
 
     it('returns discrete root path on auto trigger', () => {
-      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+      const fileMapper = new FileMapper(configMock, loggerMock, watchDirMock, dirWalkerMock);
 
       const root = fileMapper.getRootDir('/layerSources/watch/a/b/c', false);
 
@@ -55,7 +56,7 @@ describe('FileMapper', () => {
 
   describe('getFileFullPath', () => {
     it('searches the correct file', async () => {
-      const fileMapper = new FileMapper(configMock, loggerMock, dirWalkerMock);
+      const fileMapper = new FileMapper(configMock, loggerMock, watchDirMock, dirWalkerMock);
 
       await fileMapper.getFileFullPath('file', 'Tiff', '/layerSources/watch/a/b/c');
 

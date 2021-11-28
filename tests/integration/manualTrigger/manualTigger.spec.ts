@@ -1,4 +1,5 @@
 import { normalize, join as joinPath } from 'path';
+import fs from 'fs';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import axiosMock from 'jest-mock-axios';
@@ -11,11 +12,14 @@ import { tfw } from '../../mockData/tfw';
 import { fullFs, withoutProductDbf, withoutTfw, withoutTiff } from '../../mockData/fs';
 import * as requestSender from './helpers/requestSender';
 
+let mkdirSyncSpy: jest.SpyInstance;
 describe('manualTrigger', function () {
   const layerRootDir = normalize('/layerSources/testDir');
   const expectedTfw = joinPath(layerRootDir, 'a', 'pyramid0_1', 'layer', 'X1881_Y1730.tfw');
 
   beforeAll(function () {
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync');
+    mkdirSyncSpy.mockImplementation(() => undefined);
     container.clearInstances();
     registerTestValues();
     requestSender.init();
