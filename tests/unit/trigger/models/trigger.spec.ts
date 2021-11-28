@@ -4,7 +4,7 @@ import { Trigger } from '../../../../src/layerCreator/models/trigger';
 import { HistoryStatus } from '../../../../src/layerCreator/historyStatus';
 import { overseerClientMock, ingestDiscreteLayerMock } from '../../../mocks/clients/overseerClient';
 import { agentDbClientMock, updateDiscreteStatusMock, getDiscreteStatusMock } from '../../../mocks/clients/agentDbClient';
-import { filesManagerMock, fileExistsMock, readAllLinesMock } from '../../../mocks/filesManager';
+import { filesManagerMock, fileExistsMock, readAllLinesMock, directoryExistsMock } from '../../../mocks/filesManager';
 import { parseMock, shpParserMock } from '../../../mocks/shpParser';
 import { parseFilesShpJsonMock, mapMock, metadataMapperMock } from '../../../mocks/metadataMapperMock';
 import { lockMock, isQueueEmptyMock } from '../../../mocks/limitingLock';
@@ -20,6 +20,7 @@ import {
 import { tfw } from '../../../mockData/tfw';
 import { metadata } from '../../../mockData/layerMetadata';
 import { ingestionParams } from '../../../mockData/ingestionParams';
+import { NotFoundError } from '../../../../src/common/exceptions/http/notFoundError';
 
 const expectedMetadata = loadTestMetadata();
 const expectedParams = loadTestIngestionParams();
@@ -55,6 +56,7 @@ describe('trigger', () => {
     getMock.mockImplementation((key: string) => configData[key]);
     getFilePathMock.mockImplementation((file: string, extension: string) => `${file}.${extension}`);
     readAllLinesMock.mockResolvedValue(tfw);
+    directoryExistsMock.mockReturnValue(true);
   });
 
   afterEach(function () {
@@ -262,6 +264,44 @@ describe('trigger', () => {
       // expectation
       await expect(action).rejects.toThrow();
       expect(parseMock).toHaveBeenCalledTimes(5);
+    });
+
+    it('unit test: trigger will not work on invalid directory', async function () {
+      // set mock values
+      directoryExistsMock.mockReturnValue(false);
+
+      getDiscreteStatusMock.mockResolvedValue(triggeredHistoryStatus);
+      axiosMock.post.mockResolvedValue({});
+      ingestDiscreteLayerMock.mockResolvedValue({});
+      updateDiscreteStatusMock.mockResolvedValue({});
+      parseMock.mockResolvedValue({});
+      parseFilesShpJsonMock.mockReturnValue(['file.tiff']);
+      mapMock.mockReturnValue(expectedMetadata);
+      fileExistsMock.mockResolvedValue(true);
+      findFilesRelativePathsMock.mockResolvedValueOnce(shpFiles).mockResolvedValueOnce(['file.tiff']);
+      getFileFullPathMock.mockResolvedValueOnce('file.tfw');
+      getRootDirMock.mockReturnValue('/mountDir/test');
+
+      const trigger = new Trigger(
+        shpParserMock,
+        filesManagerMock,
+        metadataMapperMock,
+        overseerClientMock,
+        agentDbClientMock,
+        lockMock,
+        fileMapperMock,
+        { log: jest.fn() },
+        configMock
+      );
+
+      // action
+      const response = trigger.trigger('test', true);
+
+      // expectation
+      await expect(response).rejects.toThrow(NotFoundError);
+      expect(getDiscreteStatusMock).toHaveBeenCalledTimes(0);
+      expect(ingestDiscreteLayerMock).toHaveBeenCalledTimes(0);
+      expect(updateDiscreteStatusMock).toHaveBeenCalledTimes(0);
     });
   });
 });

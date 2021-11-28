@@ -1,4 +1,4 @@
-import { promises as fsPromise, constants as fsConstants, readFileSync } from 'fs';
+import { promises as fsPromise, constants as fsConstants, readFileSync, Stats, lstatSync } from 'fs';
 import { singleton } from 'tsyringe';
 
 @singleton()
@@ -13,6 +13,15 @@ export class FilesManager {
       .catch(() => {
         return false;
       });
+  }
+
+  public directoryExists(fullPath: string): boolean {
+    try {
+      const stats: Stats = lstatSync(fullPath);
+      return stats.isDirectory();
+    } catch (e) {
+      return false;
+    }
   }
 
   public async readAllLines(path: string): Promise<string[]> {

@@ -12,6 +12,7 @@ import { OverseerClient } from '../../serviceClients/overseerClient';
 import { AgentDbClient } from '../../serviceClients/agentDbClient';
 import { HistoryStatus } from '../historyStatus';
 import { LimitingLock } from '../../watcher/limitingLock';
+import { NotFoundError } from '../../common/exceptions/http/notFoundError';
 import { ShpParser } from './shpParser';
 import { FilesManager } from './filesManager';
 import { MetadataMapper } from './metadataMapper';
@@ -40,6 +41,10 @@ export class Trigger {
 
   public async trigger(directory: string, isManual = false): Promise<void> {
     const fullRootDir = this.fileMapper.getRootDir(directory, isManual);
+    const directoryExist = this.fileManager.directoryExists(fullRootDir);
+    if (!directoryExist) {
+      throw new NotFoundError(`directory: ${directory}, doesn't exist`);
+    }
     const relativeRootDir = this.fileMapper.cleanRelativePath(this.mountDir, fullRootDir);
     this.logger.log('debug', `triggering on directory: ${directory}`);
     const status = await this.agentDbClient.getDiscreteStatus(relativeRootDir);
