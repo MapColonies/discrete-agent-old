@@ -56,6 +56,6 @@
   },
   "classification": {
     "optionsFileLocation": "CLASSIFICATION_OPTIONS_FILE_LOCATION",
-    "storageProvider": "CLASSIFICATION_OPTIONS__STORAGE_PROVIDER"
+    "storageProvider": "CLASSIFICATION_OPTIONS_STORAGE_PROVIDER"
   }
 }
