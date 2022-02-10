@@ -5,7 +5,7 @@ import { MCLogger, IServiceConfig } from '@map-colonies/mc-logger';
 import { Services } from '../../src/common/constants';
 import { FilesManager } from '../../src/layerCreator/models/filesManager';
 import { AgentDbClient } from '../../src/serviceClients/agentDbClient';
-import { filesManagerMock, readAsStringSyncMock } from '../mocks/filesManager';
+import { filesManagerMock, readAsStringMock, readS3ObjectAsStringMock } from '../mocks/filesManager';
 import { agentDbClientMock, init as initDb } from '../mocks/clients/agentDbClient';
 import { configMock, registerDefaultConfig } from '../mocks/config';
 
@@ -27,7 +27,8 @@ function registerTestValues(): void {
 function loadClassifierData(): void {
   const classificationConfigPath = resolve(__dirname, '../mockData/classification.json');
   const classificationConfig = readFileSync(classificationConfigPath, { encoding: 'utf8' });
-  readAsStringSyncMock.mockReturnValue(classificationConfig);
+  readAsStringMock.mockResolvedValue(classificationConfig);
+  readS3ObjectAsStringMock.mockResolvedValue(classificationConfig);
 }
 
 export { registerTestValues };

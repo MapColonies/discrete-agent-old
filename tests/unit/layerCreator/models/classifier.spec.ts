@@ -1,8 +1,8 @@
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
 import { Classifier } from '../../../../src/layerCreator/models/classifier';
-import { filesManagerMock, readAsStringSyncMock } from '../../../mocks/filesManager';
-import { configMock, getMock } from '../../../mocks/config';
+import { filesManagerMock, readAsStringMock, readS3ObjectAsStringMock } from '../../../mocks/filesManager';
+import { configMock, setConfigValues } from '../../../mocks/config';
 
 let classificationConfig: string;
 
@@ -14,13 +14,22 @@ describe('classifier', () => {
   });
 
   beforeEach(() => {
-    readAsStringSyncMock.mockReturnValue(classificationConfig);
-    getMock.mockReturnValue('testPath');
+    readAsStringMock.mockResolvedValue(classificationConfig);
+    setConfigValues({
+      classification: {
+        optionsFileLocation: 'testPath',
+        storageProvider: 'FS',
+      },
+    });
     classifier = new Classifier(configMock, filesManagerMock);
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('getClassification', () => {
-    it('high res fully in bounds returns configured classification', () => {
+    it('high res fully in bounds returns configured classification', async () => {
       const res = 0.08;
       const polygon = [
         [
@@ -32,14 +41,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 1;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('med res fully in bounds returns configured classification', () => {
+    it('med res fully in bounds returns configured classification', async () => {
       const res = 0.4;
       const polygon = [
         [
@@ -51,14 +60,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 3;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('med res fully out of bounds returns configured classification', () => {
+    it('med res fully out of bounds returns configured classification', async () => {
       const res = 0.4;
       const polygon = [
         [
@@ -70,14 +79,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 4;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('med res partial cover of inner area (more then configured) returns configured classification', () => {
+    it('med res partial cover of inner area (more then configured) returns configured classification', async () => {
       const res = 0.4;
       const polygon = [
         [
@@ -89,14 +98,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 3;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('med res partial covered (less then configured) returns configured classification', () => {
+    it('med res partial covered (less then configured) returns configured classification', async () => {
       const res = 0.4;
       const polygon = [
         [
@@ -108,14 +117,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 4;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('low res in bounds returns default classification', () => {
+    it('low res in bounds returns default classification', async () => {
       const res = 0.5;
       const polygon = [
         [
@@ -127,14 +136,14 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 5;
       expect(classification).toEqual(expectedClassification);
     });
 
-    it('low res out of bounds returns default classification', () => {
+    it('low res out of bounds returns default classification', async () => {
       const res = 1;
       const polygon = [
         [
@@ -146,11 +155,43 @@ describe('classifier', () => {
         ],
       ];
       // action
-      const classification = classifier.getClassification(res, polygon);
+      const classification = await classifier.getClassification(res, polygon);
 
       // expectation
       const expectedClassification = 5;
       expect(classification).toEqual(expectedClassification);
+    });
+
+    it('request configuration file from s3 when configured to use s3', () => {
+      readAsStringMock.mockClear();
+      readS3ObjectAsStringMock.mockClear();
+      readS3ObjectAsStringMock.mockResolvedValue(classificationConfig);
+      setConfigValues({
+        classification: {
+          optionsFileLocation: 'testPath',
+          storageProvider: 'S3',
+        },
+      });
+      classifier = new Classifier(configMock, filesManagerMock);
+
+      expect(readS3ObjectAsStringMock).toHaveBeenCalledTimes(1);
+      expect(readAsStringMock).toHaveBeenCalledTimes(0);
+    });
+
+    it('request configuration file from fs when configured to use fs', () => {
+      readAsStringMock.mockClear();
+      readS3ObjectAsStringMock.mockClear();
+      readS3ObjectAsStringMock.mockResolvedValue(classificationConfig);
+      setConfigValues({
+        classification: {
+          optionsFileLocation: 'testPath',
+          storageProvider: 'fs',
+        },
+      });
+      classifier = new Classifier(configMock, filesManagerMock);
+
+      expect(readS3ObjectAsStringMock).toHaveBeenCalledTimes(0);
+      expect(readAsStringMock).toHaveBeenCalledTimes(1);
     });
   });
 });

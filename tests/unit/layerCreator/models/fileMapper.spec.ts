@@ -5,7 +5,7 @@ describe('FileMapper', () => {
   describe('stripSubDirs', () => {
     it('remove layer sub directories from folder path with normal path', () => {
       const fileMapper = new FileMapper();
-      const mapper = (fileMapper as unknown) as {
+      const mapper = fileMapper as unknown as {
         fileMappings: Record<string, unknown>;
         generateStripSubDirsRegex: () => void;
       };
@@ -23,7 +23,7 @@ describe('FileMapper', () => {
 
     it('remove layer sub directories from folder path with nested path', () => {
       const fileMapper = new FileMapper();
-      const mapper = (fileMapper as unknown) as {
+      const mapper = fileMapper as unknown as {
         fileMappings: Record<string, unknown>;
         generateStripSubDirsRegex: () => void;
       };
@@ -63,7 +63,7 @@ describe('FileMapper', () => {
 
     it('returns file path when mapped', () => {
       const fileMapper = new FileMapper();
-      const mappings = ((fileMapper as unknown) as { fileMappings: Record<string, unknown> }).fileMappings;
+      const mappings = (fileMapper as unknown as { fileMappings: Record<string, unknown> }).fileMappings;
       mappings['test'] = {
         pathPrefix: 'b/test',
         fileExtension: 'ext',

@@ -15,14 +15,14 @@ export class MetadataMapper {
     this.mappings = LayerMetadata.getShpMappings();
   }
 
-  public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
+  public async map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): Promise<LayerMetadata> {
     const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
     this.parseIdentifiers(metadata, metadataGeoJson);
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
-    this.calculateClassification(metadata, metadataGeoJson);
+    await this.calculateClassification(metadata, metadataGeoJson);
     return metadata;
   }
 
@@ -41,9 +41,9 @@ export class MetadataMapper {
     productGeoJson: GeoJSON,
     metadataGeoJson: GeoJSON,
     filesGeoJson: GeoJSON,
-    tfwFile: string[],
+    tfwFile: string[]
   ): void {
-    const metadata = (baseMetadata as unknown) as Record<string, unknown>;
+    const metadata = baseMetadata as unknown as Record<string, unknown>;
     const sources = {} as { [key: string]: unknown };
     sources[DataFileType.FILES] = filesGeoJson;
     sources[DataFileType.PRODUCT] = productGeoJson;
@@ -97,14 +97,14 @@ export class MetadataMapper {
     metadata.layerPolygonParts = metadataGeoJson;
   }
 
-  private calculateClassification(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+  private async calculateClassification(metadata: LayerMetadata, metadataGeoJson: GeoJSON): Promise<void> {
     const features = (metadataGeoJson as FeatureCollection).features;
     const props = features[0].properties;
     const coords = (features[0].geometry as Polygon).coordinates;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const resolutionStr = (props as { Resolution: string }).Resolution;
     const resolution = toNumber(resolutionStr);
-    metadata.classification = this.classifier.getClassification(resolution, coords).toString();
+    metadata.classification = (await this.classifier.getClassification(resolution, coords)).toString();
   }
 
   private castValue(value: unknown, type: string): unknown {
@@ -115,7 +115,7 @@ export class MetadataMapper {
       case TsTypes.BOOLEAN.value:
         return toBoolean(value);
       case TsTypes.DATE.value:
-        return moment.utc((value as string), 'DD/MM/YYYY').toDate();
+        return moment.utc(value as string, 'DD/MM/YYYY').toDate();
       case TsTypes.NUMBER.value:
         return toNumber(value);
       default:

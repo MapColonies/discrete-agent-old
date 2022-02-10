@@ -1,8 +1,8 @@
 import { Trigger } from '../../src/layerCreator/models/trigger';
 
 const triggerFunctionMock = jest.fn();
-const triggerMock = ({
+const triggerMock = {
   trigger: triggerFunctionMock,
-} as unknown) as Trigger;
+} as unknown as Trigger;
 
 export { triggerFunctionMock, triggerMock };

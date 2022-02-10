@@ -260,9 +260,9 @@ describe('trigger', () => {
 });
 
 function loadTestMetadata(): LayerMetadata {
-  return ({ ...metadata } as unknown) as LayerMetadata;
+  return { ...metadata } as unknown as LayerMetadata;
 }
 
 function loadTestIngestionParams(): LayerMetadata {
-  return ({ ...ingestionParams } as unknown) as LayerMetadata;
+  return { ...ingestionParams } as unknown as LayerMetadata;
 }

@@ -36,5 +36,22 @@
     "delay": "HTTP_RETRY_DELAY",
     "shouldResetTimeout": "HTTP_RETRY_RESET_TIMEOUT"
   },
-  "classificationOptionsFile": "CLASSIFICATION_OPTIONS_FILE_PATH"
+  "S3": {
+    "accessKeyId": "S3_ACCESS_KEY_ID",
+    "secretAccessKey": "S3_SECRET_ACCESS_KEY",
+    "endpoint": "S3_ENDPOINT",
+    "bucket": "S3_BUCKET",
+    "forcePathStyle": {
+      "__name": "S3_FORCE_PATH_STYLE",
+      "__format": "boolean"
+    },
+    "sslEnabled": {
+      "__name": "S3_SSL_ENABLED",
+      "__format": "boolean"
+    }
+  },
+  "classification": {
+    "optionsFileLocation": "CLASSIFICATION_OPTIONS_FILE_LOCATION",
+    "storageProvider": "CLASSIFICATION_OPTIONS__STORAGE_PROVIDER"
+  }
 }
