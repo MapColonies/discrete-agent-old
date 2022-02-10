@@ -1,3 +1,4 @@
+import { mkdirSync, existsSync } from 'fs';
 import express from 'express';
 import bodyParser from 'body-parser';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
@@ -17,7 +18,8 @@ export class ServerBuilder {
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
     private readonly requestLogger: RequestLogger,
-    @inject(Services.LOGGER) private readonly logger: ILogger
+    @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.WATCHER_CONFIG) private readonly realativeWatchDir: string
   ) {
     this.serverInstance = express();
   }
@@ -26,6 +28,7 @@ export class ServerBuilder {
     this.registerPreRoutesMiddleware();
     this.buildRoutes();
     this.registerPostRoutesMiddleware();
+    this.createWatchDirectory();
 
     return this.serverInstance;
   }
@@ -48,5 +51,18 @@ export class ServerBuilder {
 
   private registerPostRoutesMiddleware(): void {
     this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.log('error', message)));
+  }
+
+  private createWatchDirectory(): void {
+    try {
+      if (!existsSync(this.realativeWatchDir)) {
+        this.logger.log('info', `watch directory is not exists, creating in path: ${this.realativeWatchDir}.`);
+        mkdirSync(this.realativeWatchDir);
+      }
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      this.logger.log('error', `error occured while creating watch directory: '${this.realativeWatchDir}': ${error}`);
+      throw error;
+    }
   }
 }

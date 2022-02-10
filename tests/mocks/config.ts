@@ -35,6 +35,7 @@ const registerDefaultConfig = (): void => {
     mountDir: '/layerSources',
     watcher: {
       watchDirectory: 'watch',
+      rootDirNestingLevel: 1,
       watchOptions: {
         minTriggerDepth: 1,
         maxWatchDepth: 2,

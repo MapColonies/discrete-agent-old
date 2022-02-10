@@ -1,60 +1,118 @@
-import { join, normalize, sep } from 'path';
-import { singleton } from 'tsyringe';
+import { join, sep, relative, resolve } from 'path';
+import { inject, singleton } from 'tsyringe';
+import { Services } from '../../common/constants';
+import { IConfig, ILogger } from '../../common/interfaces';
+import { DirWalker } from '../../common/utilities/dirWalker';
 
 interface IFileMapping {
   fileExtension: string;
-  pathPrefix: string;
 }
 
 type FileMappings = Record<string, IFileMapping | undefined>;
 
 @singleton()
 export class FileMapper {
+  private readonly mountDir: string;
   private readonly fileMappings: FileMappings = {
     shp: {
       fileExtension: 'shp',
-      pathPrefix: 'Shapes',
     },
     dbf: {
       fileExtension: 'dbf',
-      pathPrefix: 'Shapes',
     },
     // eslint-disable-next-line @typescript-eslint/naming-convention
     Tiff: {
       fileExtension: 'tif',
-      pathPrefix: 'tiff',
     },
     tfw: {
       fileExtension: 'tfw',
-      pathPrefix: 'tiff',
     },
   };
-  private stripSubDirsRegex!: RegExp;
+  private escapePathRegex!: RegExp;
+  private readonly rootDirNestingLevel: number;
 
-  public constructor() {
-    this.generateStripSubDirsRegex();
+  public constructor(
+    @inject(Services.CONFIG) config: IConfig,
+    @inject(Services.LOGGER) private readonly logger: ILogger,
+    @inject(Services.WATCHER_CONFIG) private readonly realativeWatchDir: string,
+    private readonly dirWalker: DirWalker
+  ) {
+    this.generateRegexPatterns();
+    this.mountDir = config.get('mountDir');
+    this.rootDirNestingLevel = config.get('watcher.rootDirNestingLevel');
   }
 
-  public stripSubDirs(directory: string): string {
-    return directory.replace(this.stripSubDirsRegex, '');
+  public getRootDir(path: string, isManual = false): string {
+    if (isManual) {
+      return resolve(this.mountDir, path);
+    }
+    const baseDir = this.realativeWatchDir;
+    const relPath = this.cleanRelativePath(baseDir, path);
+    const relBaseDir = this.stripSubDirs(relPath);
+    const rootDir = resolve(baseDir, relBaseDir);
+    return rootDir;
+  }
+
+  public cleanRelativePath(from: string, to: string): string {
+    let relPath = relative(from, to);
+    if (relPath.startsWith('.')) {
+      const pointAndSeparatorLength = 2;
+      relPath = relPath.slice(pointAndSeparatorLength, undefined);
+    }
+    return relPath;
+  }
+
+  public async getFileFullPath(fileName: string, fileFormat: string, currentPath: string, isManual = false): Promise<string | undefined> {
+    const root = this.getRootDir(currentPath, isManual);
+    const filePattern = `${sep}${this.getFilePath(fileName, fileFormat)}`;
+    const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
+    const matcher = new RegExp(`.*${sanitizedPattern}`);
+    return this.dirWalker.findFile(root, matcher);
+  }
+
+  public async findFilesRelativePaths(files: string[], rootPath: string): Promise<string[]> {
+    if (!rootPath.endsWith(sep)) {
+      rootPath += sep;
+    }
+    const filePatterns = [];
+    for (const file of files) {
+      const filePattern = `${sep}${file}`;
+      const sanitizedPattern = filePattern.replace(this.escapePathRegex, '\\$&');
+      filePatterns.push(`(^.*${sanitizedPattern}$)`);
+    }
+    const pattern = filePatterns.join('|');
+    const matcher = new RegExp(pattern);
+    const filePathsGen = this.dirWalker.walk(rootPath, {
+      filePathMatcher: matcher,
+      maxResults: files.length,
+    });
+    const filePaths = [];
+    for await (const path of filePathsGen) {
+      filePaths.push(relative(rootPath, path));
+    }
+    return filePaths;
   }
 
   public getFilePath(fileName: string, fileFormat: string): string {
     const mapping = this.fileMappings[fileFormat];
     if (mapping !== undefined) {
-      return join(mapping.pathPrefix, `${fileName}.${mapping.fileExtension}`);
+      return join(`${fileName}.${mapping.fileExtension}`);
     } else {
       return `${fileName}.${fileFormat}`;
     }
   }
 
-  private generateStripSubDirsRegex(): void {
-    const subPaths = Object.values(this.fileMappings).map((mapping) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const path = normalize(mapping!.pathPrefix);
-      return path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); //escape for regex
-    });
-    const pattern = `(^|\\${sep})(${subPaths.join('|')})$`;
-    this.stripSubDirsRegex = new RegExp(pattern);
+  private stripSubDirs(directory: string): string {
+    const parts = directory.split(sep);
+    const maxParts = parts[0] === '.' ? this.rootDirNestingLevel + 1 : this.rootDirNestingLevel;
+    const rootParts: string[] = [];
+    for (let i = 0; i < maxParts; i++) {
+      rootParts.push(parts[i]);
+    }
+    return rootParts.join(sep);
+  }
+
+  private generateRegexPatterns(): void {
+    this.escapePathRegex = /[.*+?^${}()|[\]\\]/g;
   }
 }

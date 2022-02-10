@@ -4,8 +4,7 @@ export class FsItem {
   // eslint-disable-next-line @typescript-eslint/ban-types
   public static generateFsFromObject(fs: object): FsItem {
     const root = new FsItem('', FsItem.generateFsEntriesFromObject(fs));
-    const wrapper = new FsItem('fs', { '': root });
-    return wrapper;
+    return root;
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types

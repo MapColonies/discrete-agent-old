@@ -18,11 +18,17 @@ export class MetadataMapper {
   public async map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): Promise<LayerMetadata> {
     const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
+
     this.parseIdentifiers(metadata, metadataGeoJson);
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
-    await this.calculateClassification(metadata, metadataGeoJson);
+
+    await this.calculateClassification(metadata);
+    this.parseRegion(metadata, metadataGeoJson);
+
+    this.parseRawProductData(metadata, productGeoJson);
+
     return metadata;
   }
 
@@ -59,8 +65,9 @@ export class MetadataMapper {
   private parseIdentifiers(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
     const source = readProp(metadataGeoJson, 'features[0].properties.Source') as string;
     const parts = source.split('-');
-    metadata.productId = parts[0];
+    metadata.productId = parts[0].replace('v', '');
     metadata.productVersion = parts[1];
+    metadata.productName = metadata.productName?.replace(/_w84geo/g, '').replace(/_Tiff/g, '');
   }
 
   private parseSourceDates(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
@@ -80,31 +87,30 @@ export class MetadataMapper {
     }
     metadata.sourceDateStart = minDate;
     metadata.sourceDateEnd = maxDate;
-    metadata.updateDate = maxDate;
+    metadata.updateDate = new Date();
   }
 
   private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
-    const features = (metadataGeoJson as FeatureCollection).features;
-    const types = new Set<SensorType>();
-    features.forEach((feature) => {
-      const sensor = readProp(feature, 'properties.SensorType') as SensorType;
-      types.add(sensor);
-    });
-    metadata.sensorType = Array.from(types);
+    // const features = (metadataGeoJson as FeatureCollection).features;
+    // const types = new Set<SensorType>();
+    // features.forEach((feature) => {
+    //   const sensor = readProp(feature, 'properties.SensorType') as SensorType;
+    //   types.add(sensor);
+    // });
+    // metadata.sensorType = Array.from(types);
+
+    //temporary set sensor type to always be undefined
+    metadata.sensorType = [SensorType.UNDEFINED];
   }
 
   private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
     metadata.layerPolygonParts = metadataGeoJson;
   }
 
-  private async calculateClassification(metadata: LayerMetadata, metadataGeoJson: GeoJSON): Promise<void> {
-    const features = (metadataGeoJson as FeatureCollection).features;
-    const props = features[0].properties;
-    const coords = (features[0].geometry as Polygon).coordinates;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const resolutionStr = (props as { Resolution: string }).Resolution;
-    const resolution = toNumber(resolutionStr);
-    metadata.classification = (await this.classifier.getClassification(resolution, coords)).toString();
+  private async calculateClassification(metadata: LayerMetadata): Promise<void> {
+    const resolutionMeter = metadata.maxResolutionMeter as number;
+    const coordinates = (metadata.footprint as Polygon).coordinates;
+    metadata.classification = (await this.classifier.getClassification(resolutionMeter, coordinates)).toString();
   }
 
   private castValue(value: unknown, type: string): unknown {
@@ -121,5 +127,28 @@ export class MetadataMapper {
       default:
         return value;
     }
+  }
+
+  private parseRegion(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
+    const countriesSet = new Set<string>();
+    const features = (metadataGeoJson as FeatureCollection).features;
+    for (const feature of features) {
+      const props = feature.properties;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const featureCountriesStr = (props as { Countries: string | undefined | null }).Countries;
+      if (featureCountriesStr === undefined || featureCountriesStr === null || featureCountriesStr === '') {
+        continue;
+      }
+      const featureCountries = featureCountriesStr.split(',');
+      featureCountries.forEach((city) => {
+        countriesSet.add(city);
+      });
+    }
+    const countriesArr = Array.from(countriesSet);
+    metadata.region = countriesArr.join(',');
+  }
+
+  private parseRawProductData(metadata: LayerMetadata, productGeoJson: GeoJSON): void {
+    metadata.rawProductData = productGeoJson;
   }
 }

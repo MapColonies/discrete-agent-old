@@ -1,38 +1,25 @@
 import { normalize, join as joinPath } from 'path';
+import fs from 'fs';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import axiosMock from 'jest-mock-axios';
 import { registerTestValues } from '../testContainerConfig';
-import { validateLayerFilesExistsMock, validateShpFilesExistsMock, fileExistsMock, readAllLinesMock } from '../../mocks/filesManager';
+import { directoryExistsMock, fileExistsMock, readAllLinesMock } from '../../mocks/filesManager';
 import { initShapeFileMock } from '../../mocks/shapeFile';
 import { registerDefaultConfig } from '../../mocks/config';
+import { init as initFs } from '../../mocks/fs/opendir';
 import { tfw } from '../../mockData/tfw';
+import { fullFs, withoutProductDbf, withoutTfw, withoutTiff } from '../../mockData/fs';
 import * as requestSender from './helpers/requestSender';
 
+let mkdirSyncSpy: jest.SpyInstance;
 describe('manualTrigger', function () {
   const layerRootDir = normalize('/layerSources/testDir');
-  const expectedShapes = [
-    joinPath(layerRootDir, 'Shapes', 'Files.shp'),
-    joinPath(layerRootDir, 'Shapes', 'Files.dbf'),
-    joinPath(layerRootDir, 'Shapes', 'Product.shp'),
-    joinPath(layerRootDir, 'Shapes', 'Product.dbf'),
-    joinPath(layerRootDir, 'Shapes', 'ShapeMetadata.shp'),
-    joinPath(layerRootDir, 'Shapes', 'ShapeMetadata.dbf'),
-  ];
-  const expectedTiffs = [
-    normalize('tiff/X1881_Y1730.tif'),
-    normalize('tiff/X1881_Y1731.tif'),
-    normalize('tiff/X1881_Y1732.tif'),
-    normalize('tiff/X1882_Y1730.tif'),
-    normalize('tiff/X1882_Y1731.tif'),
-    normalize('tiff/X1882_Y1732.tif'),
-    normalize('tiff/X1883_Y1730.tif'),
-    normalize('tiff/X1883_Y1731.tif'),
-    normalize('tiff/X1883_Y1732.tif'),
-  ];
-  const expectedTfw = joinPath(layerRootDir, 'tiff', 'X1881_Y1730.tfw');
+  const expectedTfw = joinPath(layerRootDir, 'a', 'pyramid0_1', 'layer', 'X1881_Y1730.tfw');
 
   beforeAll(function () {
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync');
+    mkdirSyncSpy.mockImplementation(() => undefined);
     container.clearInstances();
     registerTestValues();
     requestSender.init();
@@ -40,6 +27,7 @@ describe('manualTrigger', function () {
   beforeEach(() => {
     initShapeFileMock();
     registerDefaultConfig();
+    directoryExistsMock.mockReturnValue(true);
   });
   afterEach(function () {
     jest.resetAllMocks();
@@ -48,10 +36,8 @@ describe('manualTrigger', function () {
 
   describe('Happy Path', function () {
     it('should return 200 status code when triggered on layer root dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
+      initFs(fullFs);
       axiosMock.post.mockResolvedValue({});
-      fileExistsMock.mockResolvedValue(true);
       readAllLinesMock.mockResolvedValue(tfw);
       const validRequest = {
         sourceDirectory: 'testDir',
@@ -60,48 +46,9 @@ describe('manualTrigger', function () {
       const response = await requestSender.createLayer(validRequest);
 
       expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
-      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
-      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
-    });
-
-    it('should return 200 status code when triggered on layer Shapes dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
-      axiosMock.post.mockResolvedValue({});
-      fileExistsMock.mockResolvedValue(true);
-      readAllLinesMock.mockResolvedValue(tfw);
-      const validRequest = {
-        sourceDirectory: 'testDir/Shapes',
-      };
-
-      const response = await requestSender.createLayer(validRequest);
-
-      expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
-      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
-      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
-    });
-
-    it('should return 200 status code when triggered on layer tiff dir', async function () {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
-      axiosMock.post.mockResolvedValue({});
-      fileExistsMock.mockResolvedValue(true);
-      readAllLinesMock.mockResolvedValue(tfw);
-      const validRequest = {
-        sourceDirectory: 'testDir/tiff',
-      };
-
-      const response = await requestSender.createLayer(validRequest);
-
-      expect(response.status).toBe(httpStatusCodes.OK);
-      expect(validateShpFilesExistsMock).toHaveBeenCalledWith(...expectedShapes);
-      expect(validateLayerFilesExistsMock).toHaveBeenCalledWith(layerRootDir, expectedTiffs);
-      expect(fileExistsMock).toHaveBeenCalledWith(expectedTfw);
-      expect(readAllLinesMock).toHaveBeenCalledWith(expectedTfw);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const calledTfw = readAllLinesMock.mock.calls[0][0] as string;
+      expect(calledTfw.endsWith(expectedTfw)).toBe(true);
     });
   });
 
@@ -118,8 +65,7 @@ describe('manualTrigger', function () {
     });
 
     it('should return 400 when tiff files are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(false);
-      validateShpFilesExistsMock.mockResolvedValue(true);
+      initFs(withoutTiff);
       axiosMock.post.mockResolvedValue({});
       const validRequest = {
         sourceDirectory: 'testDir',
@@ -131,8 +77,7 @@ describe('manualTrigger', function () {
     });
 
     it('should return 400 when shp files are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(false);
+      initFs(withoutProductDbf);
       axiosMock.post.mockResolvedValue({});
       const validRequest = {
         sourceDirectory: 'testDir',
@@ -144,8 +89,7 @@ describe('manualTrigger', function () {
     });
 
     it('should return 400 when first tfw file are missing', async () => {
-      validateLayerFilesExistsMock.mockResolvedValue(true);
-      validateShpFilesExistsMock.mockResolvedValue(true);
+      initFs(withoutTfw);
       axiosMock.post.mockResolvedValue({});
       fileExistsMock.mockResolvedValue(false);
       const validRequest = {
@@ -156,9 +100,46 @@ describe('manualTrigger', function () {
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
+
+    it('should return 400 status code when triggered on layer Shapes dir', async function () {
+      initFs(fullFs);
+      axiosMock.post.mockResolvedValue({});
+      readAllLinesMock.mockResolvedValue(tfw);
+      const validRequest = {
+        sourceDirectory: 'testDir/Shapes',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
+
+    it('should return 400 status code when triggered on layer tiff dir', async function () {
+      initFs(fullFs);
+      axiosMock.post.mockResolvedValue({});
+      readAllLinesMock.mockResolvedValue(tfw);
+      const validRequest = {
+        sourceDirectory: 'testDir/tiff',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+
+      expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
+    });
   });
 
   describe('Sad Path', function () {
-    // All requests with status code 4XX-5XX
+    it('should return 404 status code when triggered on invalid dir path', async function () {
+      initFs(fullFs);
+      directoryExistsMock.mockReturnValue(false);
+      axiosMock.post.mockResolvedValue({});
+      readAllLinesMock.mockResolvedValue(tfw);
+      const validRequest = {
+        sourceDirectory: 'testDir',
+      };
+
+      const response = await requestSender.createLayer(validRequest);
+      expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
+    });
   });
 });

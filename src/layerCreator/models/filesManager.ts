@@ -1,7 +1,6 @@
-import { promises as fsPromise, constants as fsConstants, readFileSync } from 'fs';
-import * as path from 'path';
-import { singleton, inject } from 'tsyringe';
+import { promises as fsPromise, constants as fsConstants, readFileSync, Stats, lstatSync } from 'fs';
 import S3 from 'aws-sdk/clients/s3';
+import { singleton, inject } from 'tsyringe';
 import { IConfig } from '../../common/interfaces';
 import { Services } from '../../common/constants';
 
@@ -15,43 +14,10 @@ interface IS3Config {
 }
 @singleton()
 export class FilesManager {
+  //required for testing as fs promises cant be mocked here
+  public openDir = fsPromise.opendir;
+
   public constructor(@inject(Services.CONFIG) private readonly config: IConfig) {}
-
-  public async validateShpFilesExists(
-    filesShp: string,
-    filesDbf: string,
-    productShp: string,
-    productDbf: string,
-    metadataShp: string,
-    metadataDbf: string
-  ): Promise<boolean> {
-    const filesExist = await Promise.all([
-      this.fileExists(filesShp),
-      this.fileExists(filesDbf),
-      this.fileExists(productShp),
-      this.fileExists(productDbf),
-      this.fileExists(metadataShp),
-      this.fileExists(metadataDbf),
-    ]);
-    for (const fileExist of filesExist) {
-      if (!fileExist) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  public async validateLayerFilesExists(directory: string, files: string[]): Promise<boolean> {
-    for (let i = 0; i < files.length; i++) {
-      if (!path.isAbsolute(files[i])) {
-        files[i] = path.join(directory, files[i]);
-      }
-      if (!(await this.fileExists(files[i]))) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   public async fileExists(path: string): Promise<boolean> {
     return fsPromise
@@ -60,6 +26,15 @@ export class FilesManager {
       .catch(() => {
         return false;
       });
+  }
+
+  public directoryExists(fullPath: string): boolean {
+    try {
+      const stats: Stats = lstatSync(fullPath);
+      return stats.isDirectory();
+    } catch (e) {
+      return false;
+    }
   }
 
   public async readAllLines(path: string): Promise<string[]> {

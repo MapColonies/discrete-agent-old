@@ -1,15 +1,17 @@
+import fs from 'fs';
 import httpStatusCodes from 'http-status-codes';
 import { container } from 'tsyringe';
 import { registerTestValues } from '../testContainerConfig';
 import { getWatchStatusMock, setWatchStatusMock } from '../../mocks/clients/agentDbClient';
 import { Watcher } from '../../../src/watcher/watcher';
 import { registerDefaultConfig } from '../../mocks/config';
+import { directoryExistsMock } from '../../mocks/filesManager';
 import * as requestSender from './helpers/requestSender';
 
 interface StatusResponse {
   isWatching: boolean;
 }
-
+let mkdirSyncSpy: jest.SpyInstance;
 describe('watchStatus', function () {
   const internalStartWatchMock = jest.fn();
   let watcherStatus: { watching: boolean };
@@ -17,6 +19,8 @@ describe('watchStatus', function () {
 
   beforeAll(function () {
     registerTestValues();
+    mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync');
+    mkdirSyncSpy.mockImplementation(() => undefined);
     watcher = container.resolve(Watcher);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
     (watcher as any).internalStartWatch = internalStartWatchMock;
@@ -29,6 +33,7 @@ describe('watchStatus', function () {
       watcherStatus.watching = true;
     });
     registerDefaultConfig();
+    directoryExistsMock.mockReturnValue(true);
   });
 
   afterEach(function () {

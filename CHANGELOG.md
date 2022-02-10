@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/MapColonies/discrete-agent/compare/v1.5.0...v1.5.1) (2021-11-28)
+
+
+### Bug Fixes
+
+* fix classification check to use resolution in meter field ([#82](https://github.com/MapColonies/discrete-agent/issues/82)) ([cf1ca89](https://github.com/MapColonies/discrete-agent/commit/cf1ca89e765658005e8690cb0c8f77e6159b98a0))
+* return 404 response on invalid directory ([#84](https://github.com/MapColonies/discrete-agent/issues/84)) ([bf6b614](https://github.com/MapColonies/discrete-agent/commit/bf6b6142d22980ddca4c8c88899ce2ca702d8026))
+
+## [1.5.0](https://github.com/MapColonies/discrete-agent/compare/v1.4.0...v1.5.0) (2021-11-10)
+
+
+### Features
+
+* change updateDate field mapping to now ([#81](https://github.com/MapColonies/discrete-agent/issues/81)) ([79f3e2c](https://github.com/MapColonies/discrete-agent/commit/79f3e2c26358c2cb51fb82e7a3d60e46746b9525))
+
+## [1.4.0](https://github.com/MapColonies/discrete-agent/compare/v1.3.0...v1.4.0) (2021-10-17)
+
+
+### Features
+
+* updated models (validation) ([#77](https://github.com/MapColonies/discrete-agent/issues/77)) ([89a8c14](https://github.com/MapColonies/discrete-agent/commit/89a8c1488f2520e9e870ef17a3856c077914a4d1))
+
+## [1.3.0](https://github.com/MapColonies/discrete-agent/compare/v1.2.3...v1.3.0) (2021-10-11)
+
+
+### Features
+
+* change path resolution to match new structure ([#70](https://github.com/MapColonies/discrete-agent/issues/70)) ([1d20a66](https://github.com/MapColonies/discrete-agent/commit/1d20a66e097e47fce9e313757bf6caf82e09825b))
+* mapped country to region ([#75](https://github.com/MapColonies/discrete-agent/issues/75)) ([8d9ae80](https://github.com/MapColonies/discrete-agent/commit/8d9ae801a6b3c418d259d8889d595213203ed5fa))
+
 ### [1.2.3](https://github.com/MapColonies/discrete-agent/compare/v1.2.2...v1.2.3) (2021-08-19)
 
 
