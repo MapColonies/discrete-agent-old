@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.1](https://github.com/MapColonies/discrete-agent/compare/v1.6.0...v1.6.1) (2022-02-17)
+
+
+### Bug Fixes
+
+* footprint mapping ([#87](https://github.com/MapColonies/discrete-agent/issues/87)) ([2076f38](https://github.com/MapColonies/discrete-agent/commit/2076f384a4d5a0f9fad834931f9cfd3923686086))
+
 ## [1.6.0](https://github.com/MapColonies/discrete-agent/compare/v1.5.1...v1.6.0) (2022-02-17)
 
 
