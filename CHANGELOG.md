@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/MapColonies/discrete-agent/compare/v1.5.1...v1.6.0) (2022-02-17)
+
+
+### Features
+
+* adds s3 support for classification config ([#86](https://github.com/MapColonies/discrete-agent/issues/86)) ([bb68adc](https://github.com/MapColonies/discrete-agent/commit/bb68adc7a6f31796ce39a42c6c9a4180884e4ea5))
+
 ### [1.5.1](https://github.com/MapColonies/discrete-agent/compare/v1.5.0...v1.5.1) (2021-11-28)
 
 
