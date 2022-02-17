@@ -110,7 +110,7 @@ export class Trigger {
       const tfwFile = await this.fileManager.readAllLines(tfwFilePath);
       const ingestionData: IngestionParams = {
         fileNames: files,
-        metadata: this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson, tfwFile),
+        metadata: await this.metadataMapper.map(productGeoJson, metaDataGeoJson, filesGeoJson, tfwFile),
         originDirectory: relativeRootDir,
       };
       try {

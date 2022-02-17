@@ -35,15 +35,15 @@ describe('metadataMapper', () => {
   });
 
   describe('map', () => {
-    it('metadata is map according to model', () => {
+    it('metadata is map according to model', async () => {
       // action
-      const metadata = metadataMapper.map(productGeoJson, metadataGeoJson, filesGeoJson, tfw);
+      const metadata = await metadataMapper.map(productGeoJson, metadataGeoJson, filesGeoJson, tfw);
 
       // expectation
       expect(metadata).toEqual(expectedMetadata);
     });
 
-    it('mapped region dont have duplicates with multiple polygon parts', () => {
+    it('mapped region dont have duplicates with multiple polygon parts', async () => {
       const srcMetadata = cloneDeep(metadataGeoJson) as FeatureCollection;
       srcMetadata.features.push(srcMetadata.features[0]);
 
@@ -51,7 +51,7 @@ describe('metadataMapper', () => {
       const expectedPolygonParts = destMetadata.layerPolygonParts as FeatureCollection;
       expectedPolygonParts.features.push(expectedPolygonParts.features[0]);
       // action
-      const metadata = metadataMapper.map(productGeoJson, srcMetadata, filesGeoJson, tfw);
+      const metadata = await metadataMapper.map(productGeoJson, srcMetadata, filesGeoJson, tfw);
 
       // expectation
       expect(metadata).toEqual(destMetadata);

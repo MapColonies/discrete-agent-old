@@ -40,5 +40,16 @@
     "delay": "exponential",
     "shouldResetTimeout": true
   },
-  "classificationOptionsFile": "config/classification.json"
+  "S3": {
+    "accessKeyId": "minioadmin",
+    "secretAccessKey": "minioadmin",
+    "endpoint": "localhost:9000",
+    "bucket": "mapping-images",
+    "forcePathStyle": true,
+    "sslEnabled": false
+  },
+  "classification": {
+    "optionsFileLocation": "config/classification.json",
+    "storageProvider": "FS"
+  }
 }

@@ -15,7 +15,7 @@ export class MetadataMapper {
     this.mappings = LayerMetadata.getShpMappings();
   }
 
-  public map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): LayerMetadata {
+  public async map(productGeoJson: GeoJSON, metadataGeoJson: GeoJSON, filesGeoJson: GeoJSON, tfwFile: string[]): Promise<LayerMetadata> {
     const metadata = new LayerMetadata();
     this.autoMapModels(metadata, productGeoJson, metadataGeoJson, filesGeoJson, tfwFile);
 
@@ -23,7 +23,8 @@ export class MetadataMapper {
     this.parseSourceDates(metadata, metadataGeoJson);
     this.parseSensorTypes(metadata, metadataGeoJson);
     this.parseLayerPolygonParts(metadata, metadataGeoJson);
-    this.calculateClassification(metadata);
+
+    await this.calculateClassification(metadata);
     this.parseRegion(metadata, metadataGeoJson);
 
     this.parseRawProductData(metadata, productGeoJson);
@@ -106,10 +107,10 @@ export class MetadataMapper {
     metadata.layerPolygonParts = metadataGeoJson;
   }
 
-  private calculateClassification(metadata: LayerMetadata): void {
+  private async calculateClassification(metadata: LayerMetadata): Promise<void> {
     const resolutionMeter = metadata.maxResolutionMeter as number;
     const coordinates = (metadata.footprint as Polygon).coordinates;
-    metadata.classification = this.classifier.getClassification(resolutionMeter, coordinates).toString();
+    metadata.classification = (await this.classifier.getClassification(resolutionMeter, coordinates)).toString();
   }
 
   private castValue(value: unknown, type: string): unknown {
