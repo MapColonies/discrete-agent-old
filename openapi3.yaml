@@ -22,8 +22,19 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: task deleted successfully
         '400':
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -75,6 +86,8 @@ components:
         - message
       properties:
         message:
+          type: string
+        stacktrace:
           type: string
     createLayerRequest:
       type: object
