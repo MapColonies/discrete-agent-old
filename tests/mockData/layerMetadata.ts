@@ -8,10 +8,7 @@ export const metadata = {
   rms: undefined,
   scale: undefined,
   producerName: undefined,
-  region: [
-    'c1',
-    'c2',
-  ],
+  region: ['c1', 'c2'],
   classification: '4',
   creationDate: undefined,
   ingestionDate: undefined,

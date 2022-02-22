@@ -47,10 +47,7 @@ export const ingestionParams = {
     updateDate: '2019-04-06T00:00:00.000Z',
     sourceDateEnd: '2019-04-06T00:00:00.000Z',
     sourceDateStart: '2019-04-06T00:00:00.000Z',
-    region: [
-      'c1',
-      'c2',
-    ],
+    region: ['c1', 'c2'],
     ingestionDate: undefined,
     srsId: undefined,
     srsName: undefined,
