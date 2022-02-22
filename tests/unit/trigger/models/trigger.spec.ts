@@ -74,6 +74,7 @@ describe('trigger', () => {
       updateDiscreteStatusMock.mockResolvedValue({});
       parseMock.mockResolvedValue({});
       parseFilesShpJsonMock.mockReturnValue(fileList);
+
       mapMock.mockReturnValue(expectedMetadata);
       fileExistsMock.mockResolvedValue(true);
       getRootDirMock.mockReturnValue('/layerSources/test');

@@ -39,7 +39,7 @@
   "dependencies": {
     "@map-colonies/error-express-handler": "^1.2.0",
     "@map-colonies/mc-logger": "^2.0.2",
-    "@map-colonies/mc-model-types": "^10.2.5",
+    "@map-colonies/mc-model-types": "file:./map-colonies-mc-model-types-10.2.5.tgz",
     "@map-colonies/mc-probe": "^1.0.0",
     "@turf/turf": "^6.5.0",
     "async-lock": "^1.3.0",
