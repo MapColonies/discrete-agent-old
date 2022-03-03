@@ -76,6 +76,7 @@ typings/
 .env.test
 config.json
 config/local.json
+helm/config/local.yaml
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
