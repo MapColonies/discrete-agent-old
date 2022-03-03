@@ -49,7 +49,7 @@ spec:
             - name: ingestion-storage
               mountPath: /layerSources
             {{- end }}
-            {{- if .Values.rasterCommon.storage.fs.internalPvc.enabled }}
+            {{- if and .Values.rasterCommon.storage.fs.internalPvc.enabled (eq (upper .Values.env.classification.storageProvider) "FS") }}
             - name: classification-config
               mountPath: /config
               subPath: config
@@ -63,7 +63,7 @@ spec:
             - name: SERVER_PORT
               value: {{ .Values.env.targetPort | quote }}
             - name: MOUNT_DIRECTORY
-              value: {{ .Values.env.mountDir }}
+              value: /layerSources
             {{- if eq (upper .Values.env.classification.storageProvider) "S3" }}
             - name: S3_ACCESS_KEY_ID
               valueFrom:
@@ -80,13 +80,13 @@ spec:
             - name: S3_BUCKET
               value: {{ .Values.rasterCommon.storage.s3.bucket | quote }}
             - name: S3_FORCE_PATH_STYLE
-              value: {{ .Values.rasterCommon.storage.s3.forcePathStyle }}
+              value: {{ .Values.rasterCommon.storage.s3.forcePathStyle | quote }}
             - name: S3_SSL_ENABLED
-              value: {{ .Values.rasterCommon.storage.s3.sslEnabled }}
+              value: {{ .Values.rasterCommon.storage.s3.sslEnabled | quote }}
             {{- end }}
             - name: EXTERNAL_READINESS_URL
               value: ''
-            - name: CLASSIFICATION_OPTIONS_STORAGE_PROVIDER
+            - name: CLASSIFICATION_OPTIONS_FILE_LOCATION
             {{- if eq (upper .Values.env.classification.storageProvider) "FS" }}
               value: /config/classification.json
             {{- else }}
@@ -115,7 +115,7 @@ spec:
             {{- toYaml .Values.resources.value | nindent 12 }}
           {{- end }}
       volumes:
-        {{- if .Values.rasterCommon.storage.fs.internalPvc.enabled }}
+        {{- if and .Values.rasterCommon.storage.fs.internalPvc.enabled (eq (upper .Values.env.classification.storageProvider) "FS") }}
         - name: classification-config
           persistentVolumeClaim:
             claimName: {{ .Values.rasterCommon.storage.fs.internalPvc.name }} 

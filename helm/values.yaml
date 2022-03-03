@@ -57,7 +57,6 @@ env:
   targetPort: 8080
   protocol: TCP
   logLevel: info
-  mountDir: "/layerSources"
   watcher:
     rootDirNestingLevel: 1
     directory: "watch"
