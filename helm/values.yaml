@@ -19,8 +19,8 @@ rasterCommon:
         enabled: true
         name: ingestion-source-pvc
     s3:
-      endpointUrl: "http://localhost:9000"
-      bucket: "raster"
+      endpointUrl: 'http://localhost:9000'
+      bucket: 'raster'
       forcePathStyle: true
       sslEnabled: false
       virtualHosting: false
@@ -49,8 +49,8 @@ image:
 S3:
   secret:
     createSecret: false # secret should be created on higher level for deployments with multiple services
-    accessKeyId: "" # used only when creating secret
-    secretAccessKey: "" # used only when creating secret  
+    accessKeyId: '' # used only when creating secret
+    secretAccessKey: '' # used only when creating secret
 
 env:
   port: 80
@@ -59,7 +59,7 @@ env:
   logLevel: info
   watcher:
     rootDirNestingLevel: 1
-    directory: "watch"
+    directory: 'watch'
     options:
       minTriggerDepth: 1
       maxWatchDepth: 2
@@ -72,7 +72,7 @@ env:
       randomize: false
   httpRetry:
     attempts: 5
-    delay: "exponential"
+    delay: 'exponential'
     shouldResetTimeout: true
   classification:
     storageProvider: FS
