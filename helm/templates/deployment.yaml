@@ -120,14 +120,14 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.rasterCommon.storage.fs.internalPvc.name }} 
         {{- end }}      
-        {{- if .Values.caSecretName }}
-        - name: root-ca
-          secret:
-            secretName: {{ .Values.caSecretName }}
-        {{- end }}
         {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.enabled }}
         - name: ingestion-storage
           persistentVolumeClaim:
             claimName: {{ quote .Values.rasterCommon.storage.fs.ingestionSourcePvc.name }}
+        {{- end }}
+        {{- if .Values.caSecretName }}
+        - name: root-ca
+          secret:
+            secretName: {{ .Values.caSecretName }}
         {{- end }}
 {{- end -}}

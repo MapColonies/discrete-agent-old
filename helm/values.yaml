@@ -75,8 +75,6 @@ env:
     delay: "exponential"
     shouldResetTimeout: true
   classification:
-    s3: 
-      fileLocation: config/classification.json
     storageProvider: FS
   tracing:
     enabled: false
