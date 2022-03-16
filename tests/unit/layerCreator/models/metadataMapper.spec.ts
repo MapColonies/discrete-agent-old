@@ -38,9 +38,6 @@ describe('metadataMapper', () => {
     it('metadata is map according to model', async () => {
       // action
       const metadata = await metadataMapper.map(productGeoJson, metadataGeoJson, filesGeoJson, tfw);
-      delete (metadata as unknown as { accuracyCE90: number }).accuracyCE90;
-      delete (metadata as unknown as { resolution: number }).resolution;
-      delete (metadata as unknown as { sensorType: unknown }).sensorType;
 
       // expectation
       expect(metadata).toEqual(expectedMetadata);

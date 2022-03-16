@@ -87,8 +87,6 @@ components:
       properties:
         message:
           type: string
-        stacktrace:
-          type: string
     createLayerRequest:
       type: object
       required:
