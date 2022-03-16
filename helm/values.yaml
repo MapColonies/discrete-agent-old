@@ -6,8 +6,8 @@ global:
 
 rasterCommon:
   serviceUrls:
-    oveseer: http://localhost:8081
-    agentDb: http://localhost:8082
+    discreteOverseer: http://localhost:8081
+    discreteAgentDb: http://localhost:8082
   storage:
     fs:
       internalPvc:
