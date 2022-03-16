@@ -18,8 +18,8 @@ data:
   WATCHER_SHP_RETRY_MIN_TIMEOUT: {{ .Values.env.watcher.shpRetry.minTimeout | quote }}
   WATCHER_SHP_RETRY_MAX_TIMEOUT: {{ .Values.env.watcher.shpRetry.maxTimeout | quote }}
   WATCHER_SHP_RETRY_RANDOMIZE: {{ .Values.env.watcher.shpRetry.randomize | quote }}
-  OVERSEER_URL: {{ .Values.rasterCommon.serviceUrls.oveseer | quote }}
-  AGENT_DB_URL: {{ .Values.rasterCommon.serviceUrls.agentDb | quote }}
+  OVERSEER_URL: {{ .Values.rasterCommon.serviceUrls.discreteOverseer | quote }}
+  AGENT_DB_URL: {{ .Values.rasterCommon.serviceUrls.discreteAgentDb | quote }}
   HTTP_RETRY_ATTEMPTS: {{ .Values.env.httpRetry.attempts | quote }}
   HTTP_RETRY_DELAY: {{ .Values.env.httpRetry.delay | quote }}
   HTTP_RETRY_RESET_TIMEOUT: {{ .Values.env.httpRetry.shouldResetTimeout | quote }}
