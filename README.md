@@ -32,7 +32,7 @@ each discrete should be in it's own directory and contain the following structur
     - `Resolution` - the resolution of the discrete in meters/pixel.
     - `EP90` - accuracy of the discrete layer.
     - `Rms` - tolerance % (nullable).
-    - `sensors` - layer sensors array, each element represents a sensor type that was used to create the layer.
+    - `sensors` - layer sensors array, each element represents a sensor name that was used to create the layer.
     - `Scale` - scale of discrete (nullable).
 
 ### Discrete Agent configurations:
