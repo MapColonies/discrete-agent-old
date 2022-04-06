@@ -1,4 +1,4 @@
-import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes, SensorType } from '@map-colonies/mc-model-types';
+import { IPropSHPMapping, LayerMetadata, DataFileType, TsTypes } from '@map-colonies/mc-model-types';
 import { injectable } from 'tsyringe';
 import { FeatureCollection, GeoJSON, Polygon } from 'geojson';
 import { get as readProp, toNumber, isNil } from 'lodash';
@@ -91,16 +91,13 @@ export class MetadataMapper {
   }
 
   private parseSensorTypes(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
-    // const features = (metadataGeoJson as FeatureCollection).features;
-    // const types = new Set<SensorType>();
-    // features.forEach((feature) => {
-    //   const sensor = readProp(feature, 'properties.SensorType') as SensorType;
-    //   types.add(sensor);
-    // });
-    // metadata.sensorType = Array.from(types);
-
-    //temporary set sensor type to always be undefined
-    metadata.sensorType = [SensorType.UNDEFINED];
+    const features = (metadataGeoJson as FeatureCollection).features;
+    const sensors = new Set<string>();
+    features.forEach((feature) => {
+      const sensor = readProp(feature, 'properties.SensorType') as string;
+      sensors.add(sensor);
+    });
+    metadata.sensors = Array.from(sensors);
   }
 
   private parseLayerPolygonParts(metadata: LayerMetadata, metadataGeoJson: GeoJSON): void {
@@ -144,8 +141,7 @@ export class MetadataMapper {
         countriesSet.add(city);
       });
     }
-    const countriesArr = Array.from(countriesSet);
-    metadata.region = countriesArr.join(',');
+    metadata.region = Array.from(countriesSet);
   }
 
   private parseRawProductData(metadata: LayerMetadata, productGeoJson: GeoJSON): void {

@@ -32,7 +32,7 @@ each discrete should be in it's own directory and contain the following structur
     - `Resolution` - the resolution of the discrete in meters/pixel.
     - `EP90` - accuracy of the discrete layer.
     - `Rms` - tolerance % (nullable).
-    - `SensorType` - the type of the sensor used to create the discrete layer part (must be supported type from [mc-models](https://github.com/MapColonies/mc-models/blob/master/src/models/layerMetadata/enums.ts)).
+    - `sensors` - layer sensors array, each element represents a sensor name that was used to create the layer.
     - `Scale` - scale of discrete (nullable).
 
 ### Discrete Agent configurations:

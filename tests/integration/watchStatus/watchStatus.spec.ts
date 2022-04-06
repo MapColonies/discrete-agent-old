@@ -46,6 +46,7 @@ describe('watchStatus', function () {
       watcherStatus.watching = true;
 
       const response = await requestSender.getStatus();
+      expect(response).toSatisfyApiSpec();
       const body = response.body as StatusResponse;
 
       expect(response.status).toBe(httpStatusCodes.OK);
@@ -56,6 +57,7 @@ describe('watchStatus', function () {
       watcherStatus.watching = false;
 
       const response = await requestSender.getStatus();
+      expect(response).toSatisfyApiSpec();
       const body = response.body as StatusResponse;
 
       expect(response.status).toBe(httpStatusCodes.OK);
@@ -72,6 +74,7 @@ describe('watchStatus', function () {
       });
 
       const response = await requestSender.startWatching();
+      expect(response).toSatisfyApiSpec();
       const body = response.body as StatusResponse;
 
       expect(response.status).toBe(httpStatusCodes.OK);
@@ -85,6 +88,7 @@ describe('watchStatus', function () {
       watcherStatus.watching = true;
 
       const response = await requestSender.startWatching();
+      expect(response).toSatisfyApiSpec();
       const body = response.body as StatusResponse;
 
       expect(response.status).toBe(httpStatusCodes.OK);
@@ -99,6 +103,7 @@ describe('watchStatus', function () {
       setWatchStatusMock.mockResolvedValue({ isWatching: false });
 
       const response = await requestSender.stopWatching();
+      expect(response).toSatisfyApiSpec();
       const body = response.body as StatusResponse;
 
       expect(response.status).toBe(httpStatusCodes.OK);
