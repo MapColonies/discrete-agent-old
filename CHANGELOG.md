@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/MapColonies/discrete-agent/compare/v1.6.1...v1.7.0) (2022-04-07)
+
+
+### Features
+
+* update model and add open-API tests ([#88](https://github.com/MapColonies/discrete-agent/issues/88)) ([d7579d1](https://github.com/MapColonies/discrete-agent/commit/d7579d1f61ebb55a975a2f4c0ecb9f7e00ea695b))
+
 ### [1.6.1](https://github.com/MapColonies/discrete-agent/compare/v1.6.0...v1.6.1) (2022-02-17)
 
 
