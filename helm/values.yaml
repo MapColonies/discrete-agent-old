@@ -25,6 +25,11 @@ rasterCommon:
       sslEnabled: false
       virtualHosting: false
       secretName: raster-config-s3-secret
+  ca:
+    secretName: ''
+    path: '/usr/local/share/ca-certificates'
+    key: 'ca.crt'
+
 
 enabled: true
 environment: development
@@ -37,10 +42,6 @@ cloudProvider:
   dockerRegistryUrl: my-registry-url.io
   imagePullSecretName: 'my-registry-secret'
   flavor: openshift
-
-caSecretName: ''
-caPath: '/usr/local/share/ca-certificates'
-caKey: 'ca.crt'
 
 image:
   repository: discrete-agent

@@ -54,10 +54,10 @@ spec:
               mountPath: /config
               subPath: config
             {{- end }}
-            {{- if .Values.caSecretName }}
-            - mountPath: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
+            {{- if .Values.rasterCommon.ca.secretName }}
+            - mountPath: {{ printf "%s/%s" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
               name: root-ca
-              subPath: {{ quote .Values.caKey }}
+              subPath: {{ quote .Values.rasterCommon.ca.key }}
             {{- end }}
           env:
             - name: SERVER_PORT
@@ -92,11 +92,11 @@ spec:
             {{- else }}
               value: config/classification.json
             {{- end }}
-            {{- if .Values.caSecretName }}
+            {{- if .Values.rasterCommon.ca.secretName }}
             - name: REQUESTS_CA_BUNDLE
-              value: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
+              value: {{ printf "%s/%s" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
             - name: NODE_EXTRA_CA_CERTS
-              value: {{ printf "[%s/%s]" .Values.caPath .Values.caKey | quote }}
+              value: {{ printf "[%s/%s]" .Values.rasterCommon.ca.path .Values.rasterCommon.ca.key | quote }}
             {{- end }}
           envFrom:
             - configMapRef:
@@ -125,9 +125,9 @@ spec:
           persistentVolumeClaim:
             claimName: {{ quote .Values.rasterCommon.storage.fs.ingestionSourcePvc.name }}
         {{- end }}
-        {{- if .Values.caSecretName }}
+        {{- if .Values.rasterCommon.ca.secretName }}
         - name: root-ca
           secret:
-            secretName: {{ .Values.caSecretName }}
+            secretName: {{ .Values.rasterCommon.ca.secretName }}
         {{- end }}
 {{- end -}}
