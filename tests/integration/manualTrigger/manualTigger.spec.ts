@@ -44,6 +44,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.OK);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -60,6 +61,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(invalidRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -72,6 +74,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -84,6 +87,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -97,6 +101,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -110,6 +115,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -123,6 +129,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
 
       expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
     });
@@ -139,6 +146,7 @@ describe('manualTrigger', function () {
       };
 
       const response = await requestSender.createLayer(validRequest);
+      expect(response).toSatisfyApiSpec();
       expect(response.status).toBe(httpStatusCodes.NOT_FOUND);
     });
   });

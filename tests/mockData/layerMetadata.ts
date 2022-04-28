@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 export const metadata = {
-  resolution: 0.0000018519,
+  maxResolutionDeg: 0.0000018519,
   maxResolutionMeter: 0.2,
-  accuracyCE90: 1,
-  sensorType: ['UNDEFINED'],
+  minHorizontalAccuracyCE90: 1,
+  sensors: ['OTHER'],
   rms: undefined,
   scale: undefined,
   producerName: undefined,
-  region: 'c1,c2',
+  region: ['c1', 'c2'],
   classification: '4',
   creationDate: undefined,
   ingestionDate: undefined,
