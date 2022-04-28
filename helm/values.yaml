@@ -30,7 +30,6 @@ rasterCommon:
     path: '/usr/local/share/ca-certificates'
     key: 'ca.crt'
 
-
 enabled: true
 environment: development
 replicaCount: 1
