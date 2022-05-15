@@ -13,6 +13,7 @@ rasterCommon:
       internalPvc:
         enabled: true
         name: internal-pvc
+        configSubPath: config
       ingestionSourcePvc:
         enabled: true
         name: ingestion-source-pvc

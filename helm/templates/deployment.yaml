@@ -52,7 +52,7 @@ spec:
             {{- if and .Values.rasterCommon.storage.fs.internalPvc.enabled (eq (upper .Values.env.classification.storageProvider) "FS") }}
             - name: classification-config
               mountPath: /config
-              subPath: config
+              subPath: {{ .Values.rasterCommon.storage.fs.internalPvc.configSubPath }}
             {{- end }}
             {{- if .Values.caSecretName }}
             - mountPath: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
