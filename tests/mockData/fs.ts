@@ -33,15 +33,16 @@ const fullFs = {
 };
 
 const withoutTfw = cloneDeep(fullFs);
-// @ts-ignore
-delete withoutTfw.layerSources.testDir.a.pyramid0_1.layer['X1881_Y1730.tfw'];
+
+let file = withoutTfw.layerSources.testDir.a.pyramid0_1.layer as Record<string, unknown>;
+delete file['X1881_Y1730.tfw'];
 
 const withoutProductDbf = cloneDeep(fullFs);
-// @ts-ignore
-delete withoutProductDbf.layerSources.testDir.Shapes['Product.dbf'];
+file = withoutProductDbf.layerSources.testDir.Shapes as Record<string, unknown>;
+delete file['Product.dbf'];
 
 const withoutTiff = cloneDeep(fullFs);
-// @ts-ignore
-delete withoutTiff.layerSources.testDir.a.pyramid0_1.layer['X1881_Y1732.tif'];
+file = withoutTiff.layerSources.testDir.a.pyramid0_1.layer as Record<string, unknown>;
+delete file['X1881_Y1732.tif'];
 
 export { fullFs, withoutTfw, withoutProductDbf, withoutTiff };
