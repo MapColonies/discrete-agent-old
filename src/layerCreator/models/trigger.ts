@@ -145,7 +145,7 @@ export class Trigger {
       } catch (err) {
         if (isManual) {
           //throw error to user on manual trigger
-          bail(err);
+          bail(err as Error);
         } else if (this.lock.isQueueEmpty(directory)) {
           //trigger retry only when it was triggered by watcher and it is the last file that was copied to watch dir
           throw err;
