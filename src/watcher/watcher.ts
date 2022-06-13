@@ -102,7 +102,7 @@ export class Watcher {
       } catch (err) {
         const error = err as Error;
         this.logger.log('error', `failed to trigger layer for ${path}. error: ${error.message}`);
-        return done(err);
+        return done(error);
       }
     };
     this.logger.log('debug', `watch triggered for ${path}`);
