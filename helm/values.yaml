@@ -17,6 +17,8 @@ rasterCommon:
       ingestionSourcePvc:
         enabled: true
         name: ingestion-source-pvc
+        subPath: ingestion-source
+
     s3:
       endpointUrl: 'http://localhost:9000'
       bucket: 'raster'
