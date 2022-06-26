@@ -48,6 +48,9 @@ spec:
             {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.enabled }}
             - name: ingestion-storage
               mountPath: /layerSources
+            {{- if .Values.rasterCommon.storage.fs.ingestionSourcePvc.subPath }}
+              subPath: {{ .Values.rasterCommon.storage.fs.ingestionSourcePvc.subPath }}
+              {{- end }}
             {{- end }}
             {{- if and .Values.rasterCommon.storage.fs.internalPvc.enabled (eq (upper .Values.env.classification.storageProvider) "FS") }}
             - name: classification-config
